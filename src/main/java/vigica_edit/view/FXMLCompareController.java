@@ -18,6 +18,7 @@ package vigica_edit.view;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -36,7 +37,7 @@ public class FXMLCompareController implements Initializable {
     /**
     * The data as an observable list of Service.
     */
-    private ArrayList<Service> services = new ArrayList();
+    private List<Service> services = new ArrayList<>();
     private ObservableList<Service> serviceData = FXCollections.observableArrayList();
     
 //    @FXML
@@ -61,7 +62,7 @@ public class FXMLCompareController implements Initializable {
     public FXMLCompareController() {
     }
     
-    public void setServices(ArrayList<Service> services) {
+    public void setServices(List<Service> services) {
         serviceData.setAll(services);
         serviceTable.setItems(serviceData);
     }

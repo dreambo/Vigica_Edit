@@ -16,10 +16,15 @@
  */
 package vigica_edit.model;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 
@@ -28,7 +33,11 @@ import javafx.beans.property.SimpleBooleanProperty;
  * 
  * @author nabillo
  */
+@Entity
+@Table(name="SERVICE")
 public class Service {
+
+	@Id
     private final StringProperty s_type;
     private final IntegerProperty s_idx;
     private final StringProperty s_name;

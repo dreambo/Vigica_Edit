@@ -8,6 +8,6 @@
     <property name="hibernate.query.factory_class">org.hibernate.hql.internal.classic.ClassicQueryTranslatorFactory</property>
     <property name="hibernate.hbm2ddl.auto">create</property>
     <property name="hibernate.show_sql">false</property>
-    <mapping resource="vigica_edit/hibernate.hbm.xml"/>
+    <mapping resource="/hibernate.hbm.xml"/>
   </session-factory>
 </hibernate-configuration>

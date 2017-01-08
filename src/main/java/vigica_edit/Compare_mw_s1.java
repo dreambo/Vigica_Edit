@@ -16,8 +16,9 @@
  */
 package vigica_edit;
 
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
@@ -35,12 +36,12 @@ import vigica_edit.view.FXMLCompareController;
  * @author bnabi
  */
 public class Compare_mw_s1 {
-    public ArrayList<Service> servicesLost = new ArrayList();
+    public List<Service> servicesLost = new ArrayList<>();
     private Decompress_mw_s1 decompress = new Decompress_mw_s1();
     private Service_BDD bdd = new Service_BDD();
     public CompareTask compareTask;
     
-    private ArrayList<Service> getLostServices() {
+    private List<Service> getLostServices() {
         return servicesLost;
     }
     
@@ -48,7 +49,7 @@ public class Compare_mw_s1 {
         compareTask = new CompareTask();
     }
     
-    private void detectNew(ArrayList<Service> services, ArrayList<Service> servicesOld) throws Exception {
+    private void detectNew(List<Service> services, List<Service> servicesOld) throws Exception {
         Boolean isNew;
         
         try {
@@ -74,7 +75,7 @@ public class Compare_mw_s1 {
         }
     }
     
-    private void integratePPR(ArrayList<Service> services, ArrayList<Service> servicesOld) throws Exception {
+    private void integratePPR(List<Service> services, List<Service> servicesOld) throws Exception {
         Boolean isFind;
         servicesLost.clear();
         
@@ -109,7 +110,7 @@ public class Compare_mw_s1 {
         }
     }
     
-    private void showOldPPR(Stage primaryStage, ArrayList<Service> services) {
+    private void showOldPPR(Stage primaryStage, List<Service> services) {
         try {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(Vigica_Edit.class.getResource("view/FXMLCompare.fxml"));
@@ -133,7 +134,7 @@ public class Compare_mw_s1 {
         }
     }
     
-    public class CompareTask extends Task<ArrayList<Service>> {
+    public class CompareTask extends Task<List<Service>> {
 
         private String chemin;
         Stage stage;
@@ -155,10 +156,10 @@ public class Compare_mw_s1 {
         }
 
         @Override
-        protected ArrayList<Service> call() throws Exception {
-            ArrayList<Service> services;
-            ArrayList <Service> servicesOld;
-            ArrayList <Service> servicesNew;
+        protected List<Service> call() throws Exception {
+            List<Service> services;
+            List<Service> servicesOld;
+            List<Service> servicesNew;
             int count = 0;
 
             updateProgress(-1, 0);

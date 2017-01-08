@@ -15,3 +15,8 @@ hs_err_pid*
 /Vigica_Edit/seg0/
 /Vigica_Edit/log/
 /derby.log
+/target/
+.classpath
+.project
+.settings/
+

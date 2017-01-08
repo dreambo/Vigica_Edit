@@ -22,6 +22,8 @@ import java.nio.file.Paths;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -42,9 +44,9 @@ public class Decompress_mw_s1 {
     public DuplicateTask duplicateTask;
     
     
-    public ArrayList<Service> services = new ArrayList();
+    public List<Service> services = new ArrayList<>();
 
-    public ArrayList<Service> getServices() {
+    public List<Service> getServices() {
         return services;
     }
     
@@ -238,7 +240,7 @@ public class Decompress_mw_s1 {
         return new_ppr;
     }
     
-    public class DecompressTask extends Task<ArrayList<Service>> {
+    public class DecompressTask extends Task<List<Service>> {
 
         private String chemin;
         
@@ -251,8 +253,8 @@ public class Decompress_mw_s1 {
         }
 
         @Override
-        protected ArrayList<Service> call() throws Exception {
-            ArrayList<Service> services;
+        protected List<Service> call() throws Exception {
+            List<Service> services;
             int count = 0;
 
             updateProgress(-1, 0);
@@ -271,25 +273,25 @@ public class Decompress_mw_s1 {
         };
     }
     
-    public class DuplicateTask extends Task<ArrayList<Service>> {
+    public class DuplicateTask extends Task<List<Service>> {
 
         ObservableList<Service> services = FXCollections.observableArrayList();
         
-        public ObservableList <Service> getServices() {
+        public ObservableList<Service> getServices() {
             return this.services;
         }
 
-        public void setServices(ObservableList <Service> services) {
+        public void setServices(ObservableList<Service> services) {
             this.services = services;
         }
 
         @Override
-        protected ArrayList<Service> call() throws Exception {
-            ArrayList <Service> servicesUnique = new ArrayList();
+        protected List<Service> call() throws Exception {
+            List<Service> servicesUnique = new ArrayList<>();
             int count = 0;
 
             updateProgress(-1, 0);
-            ArrayList<String> uniqueId = new ArrayList<>();
+            List<String> uniqueId = new ArrayList<>();
             
             int i=1;
 

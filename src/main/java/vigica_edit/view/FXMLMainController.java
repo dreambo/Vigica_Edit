@@ -19,6 +19,7 @@ package vigica_edit.view;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
@@ -206,7 +207,7 @@ public class FXMLMainController implements Initializable {
         // Editable service name
         s_nameColumn.setCellFactory(new Callback<TableColumn<Service, String>, TableCell<Service, String>>() {
             @Override
-            public TableCell call(TableColumn p) {
+            public TableCell<Service, String> call(TableColumn<Service, String> p) {
                 return new EditingCell();
             }
         });
@@ -347,7 +348,7 @@ public class FXMLMainController implements Initializable {
     @FXML
     private void handleFilterAction(ActionEvent event) {
         
-        ArrayList <Service> services = new ArrayList();;
+        List<Service> services = new ArrayList<>();;
         
         try{
             String sql = "FROM Service WHERE 1=1 ";

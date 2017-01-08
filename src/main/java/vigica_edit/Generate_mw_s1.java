@@ -20,6 +20,7 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import javafx.concurrent.Task;
 import vigica_edit.model.Service;
 
@@ -39,22 +40,22 @@ public class Generate_mw_s1 {
      *
      * @param chemin
      */
-    public void compress(ArrayList<Service> services, String chemin) throws Exception {
-        ArrayList<Byte> satservices = new ArrayList();
+    public void compress(List<Service> services, String chemin) throws Exception {
+        List<Byte> satservices = new ArrayList<>();
 
         for (Service service : services) {
             if (service.getS_flag() == false) {
-                ArrayList<Byte> sdata = hexStringToBytes(service.getS_line());
+                List<Byte> sdata = hexStringToBytes(service.getS_line());
                 satservices.addAll(sdata);
             } else {
-                ArrayList<Byte> sdata = hexStringToBytes(service.getS_line());
+            	List<Byte> sdata = hexStringToBytes(service.getS_line());
                 int rcdlen = sdata.size();
-                ArrayList<Byte> prefba = getppr(service.getS_ppr());
+                List<Byte> prefba = getppr(service.getS_ppr());
                 sdata.set(rcdlen-10, prefba.get(0));
                 sdata.set(rcdlen-9, prefba.get(1));
 
                 //sdata.set(rcdlen - 8, (byte) 0x01);
-                ArrayList<Byte> newn = new ArrayList();
+                List<Byte> newn = new ArrayList<>();
                 
                 for (byte c : service.getS_name().getBytes("UTF-8"))
                     newn.add(c);
@@ -64,7 +65,7 @@ public class Generate_mw_s1 {
                 List<Byte> filler = sdata.subList(2, 2 + 3);
                 List<Byte> payload = sdata.subList(rcdnamel + 5, sdata.size());
                 
-                ArrayList<Byte> newrec = new ArrayList();
+                List<Byte> newrec = new ArrayList<>();
                 newrec.add((byte) 0x01);
                 newrec.add((byte) newl);
                 newrec.addAll(filler);
@@ -79,16 +80,16 @@ public class Generate_mw_s1 {
         }
 
         Byte[] ffbytes = {(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x0C};
-        ArrayList<Byte> ffbyte = new ArrayList(Arrays.asList(ffbytes));
+        List<Byte> ffbyte = new ArrayList<>(Arrays.asList(ffbytes));
 
         Byte[] snbytes = int2ba(services.size());
-        ArrayList<Byte> snbyte = new ArrayList(Arrays.asList(snbytes));
+        List<Byte> snbyte = new ArrayList<>(Arrays.asList(snbytes));
 
         int fl = satservices.size() + 12; // 4 crc + 4 type + 4 service count + all service records
         Byte[] flbytes = int2ba(fl);
-        ArrayList<Byte> flbyte = new ArrayList(Arrays.asList(flbytes));
+        List<Byte> flbyte = new ArrayList<>(Arrays.asList(flbytes));
 
-        ArrayList<Byte> bindata = new ArrayList();
+        List<Byte> bindata = new ArrayList<>();
         bindata.addAll(ffbyte);
         bindata.addAll(snbyte);
         bindata.addAll(satservices);
@@ -101,9 +102,9 @@ public class Generate_mw_s1 {
         
         String crcresult = crc.getValue();
         crcresult = ("00000000" + crcresult).substring(crcresult.length());
-        ArrayList<Byte> crcbyte = hexStringToBytes(crcresult);
+        List<Byte> crcbyte = hexStringToBytes(crcresult);
         
-        ArrayList<Byte> mw_s1 = new ArrayList();
+        List<Byte> mw_s1 = new ArrayList<>();
         mw_s1.addAll(flbyte);
         mw_s1.addAll(crcbyte);
         mw_s1.addAll(bindata);
@@ -114,10 +115,10 @@ public class Generate_mw_s1 {
         
     }
 
-    private static ArrayList<Byte> hexStringToBytes(String s) {
+    private static List<Byte> hexStringToBytes(String s) {
         int len = s.length();
         byte[] temp = new byte[len / 2];
-        ArrayList<Byte> data = new ArrayList<>(len / 2);
+        List<Byte> data = new ArrayList<>(len / 2);
         for (int i = 0; i < len; i += 2) {
             temp[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
                     + Character.digit(s.charAt(i + 1), 16));
@@ -138,8 +139,8 @@ public class Generate_mw_s1 {
         return result;
     }
 
-    private ArrayList<Byte> getppr(String preference) {
-        ArrayList<Byte> ppr = new ArrayList<>(2);
+    private List<Byte> getppr(String preference) {
+        List<Byte> ppr = new ArrayList<>(2);
         ppr.add((byte) 0x00);
         ppr.add((byte) 0x00);
 
@@ -174,7 +175,7 @@ public class Generate_mw_s1 {
 
         @Override
         protected Void call() throws Exception {
-            ArrayList<Service> services;
+            List<Service> services;
             int count = 0;
 
             updateProgress(-1, 0);

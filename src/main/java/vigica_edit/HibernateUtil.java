@@ -36,10 +36,10 @@ public class HibernateUtil {
         try {
             // Create the SessionFactory from standard (hibernate.cfg.xml) 
             // config file.
-            URL myurl = Thread.currentThread().getContextClassLoader().getResource("vigica_edit/hibernate.cfg.xml");
+            URL myurl = Thread.currentThread().getContextClassLoader().getResource("/hibernate.cfg.xml");
             sessionFactory = new Configuration().configure(myurl).buildSessionFactory();
         } catch (Throwable e) {
-            // Log the exception. 
+            // Log the exception.
             error_msg.Error_diag(e.getCause().getMessage());
             throw new ExceptionInInitializerError(e);
         }

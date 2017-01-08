@@ -17,6 +17,7 @@
 package vigica_edit;
 
 import java.io.IOException;
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -31,18 +32,17 @@ import javafx.stage.Stage;
  * @author bnabi
  */
 public class Vigica_Edit extends Application {
-    
+
     private Stage primaryStage;
     private AnchorPane rootLayout;
 
-    public Vigica_Edit() {
-    }
-    
+    public Vigica_Edit() {}
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage;
         this.primaryStage.setTitle("Vigica Edit");
-        this.primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("app_icon.png")));
+        this.primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/app_icon.png")));
 
         initRootLayout();
 
@@ -59,7 +59,7 @@ public class Vigica_Edit extends Application {
         try {
             // Load root layout from fxml file.
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(Vigica_Edit.class.getResource("view/RootLayout.fxml"));
+            loader.setLocation(Vigica_Edit.class.getResource("/view/RootLayout.fxml"));
             rootLayout = (AnchorPane) loader.load();
 
             // Show the scene containing the root layout.
@@ -80,7 +80,7 @@ public class Vigica_Edit extends Application {
         try {
             // Load person overview.
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(Vigica_Edit.class.getResource("view/FXMLMain.fxml"));
+            loader.setLocation(Vigica_Edit.class.getResource("/view/FXMLMain.fxml"));
             AnchorPane serviceOverview = (AnchorPane) loader.load();
 
             // Set service overview into the center of root layout.

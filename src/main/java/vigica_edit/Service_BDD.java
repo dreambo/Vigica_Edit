@@ -18,6 +18,8 @@ package vigica_edit;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -37,12 +39,12 @@ public class Service_BDD {
         
     }
     
-    public ArrayList read_bdd () throws HibernateException {
+    public List<Service> read_bdd () throws HibernateException {
         return read_bdd("FROM Service");
     }
     
-    public ArrayList read_bdd (String sql) throws HibernateException {
-        ArrayList<Service> services = new ArrayList();
+    public List<Service> read_bdd (String sql) throws HibernateException {
+        List<Service> services = new ArrayList<>();
         
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = null;
@@ -85,7 +87,7 @@ public class Service_BDD {
         }
     }
     
-    public void save_bdd (ArrayList<Service> services)  throws HibernateException {
+    public void save_bdd (List<Service> services)  throws HibernateException {
         for(Service service : services){
             save_bdd(service);
         }
