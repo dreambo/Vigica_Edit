@@ -27,7 +27,7 @@ import javafx.concurrent.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import vigica.model.Service;
+import vigica.model.DVBService;
 import vigica.service.IService;
 
 /**
@@ -50,10 +50,10 @@ public class Generate_mw_s1 {
      *
      * @param chemin
      */
-    public void compress(List<Service> services, File chemin) throws Exception {
+    public void compress(List<DVBService> services, File chemin) throws Exception {
         List<Byte> satservices = new ArrayList<>();
 
-        for (Service service : services) {
+        for (DVBService service : services) {
             if (service.getFlag() == false) {
                 List<Byte> sdata = hexStringToBytes(service.getLine());
                 satservices.addAll(sdata);
@@ -185,7 +185,7 @@ public class Generate_mw_s1 {
 
         @Override
         protected Void call() throws Exception {
-            List<Service> services;
+            List<DVBService> services;
             int count = 0;
 
             updateProgress(-1, 0);

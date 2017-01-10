@@ -20,6 +20,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
@@ -29,11 +32,8 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import vigica.model.Service;
+import vigica.model.DVBService;
+import vigica.service.BeanFactory;
 import vigica.service.IService;
 import vigica.view.FXMLCompareController;
 
@@ -44,15 +44,15 @@ import vigica.view.FXMLCompareController;
 @Component
 public class Compare_mw_s1 {
 
-	public List<Service> servicesLost = new ArrayList<>();
+	public List<DVBService> servicesLost = new ArrayList<>();
     public CompareTask compareTask;
     
     @Autowired
-    private Decompress_mw_s1 decompress;// = new Decompress_mw_s1();
+    private Decompress_mw_s1 decompress = new Decompress_mw_s1();
     @Autowired
-    private IService bdd;// = BeanFactory.getService();
+    private IService bdd = BeanFactory.getService();
     
-    private List<Service> getLostServices() {
+    private List<DVBService> getLostServices() {
         return servicesLost;
     }
     
@@ -60,16 +60,16 @@ public class Compare_mw_s1 {
         compareTask = new CompareTask();
     }
     
-    private void detectNew(List<Service> services, List<Service> servicesOld) throws Exception {
+    private void detectNew(List<DVBService> services, List<DVBService> servicesOld) throws Exception {
         Boolean isNew;
         
         try {
-            for (Service service : services) {
+            for (DVBService service : services) {
                 isNew = true;
                 String line;
                 String lineOld;
 
-                for (Service serviceOld : servicesOld) {
+                for (DVBService serviceOld : servicesOld) {
                     line = service.getName();
                     lineOld = serviceOld.getName();
 
@@ -86,18 +86,18 @@ public class Compare_mw_s1 {
         }
     }
     
-    private void integratePPR(List<Service> services, List<Service> servicesOld) throws Exception {
+    private void integratePPR(List<DVBService> services, List<DVBService> servicesOld) throws Exception {
         Boolean isFind;
         servicesLost.clear();
         
         try {
-            for (Service serviceOld : servicesOld) {
+            for (DVBService serviceOld : servicesOld) {
                 isFind = false;
                 String line;
                 String lineOld;
 
                 if (serviceOld.getPpr().length() != 0) {
-                    for (Service service : services) {
+                    for (DVBService service : services) {
                         line = service.getName();
                         lineOld = serviceOld.getName();
 
@@ -113,7 +113,7 @@ public class Compare_mw_s1 {
                     isFind = true;
 
                 if (!isFind) {
-                    servicesLost.add(new Service(serviceOld.getType(), serviceOld.getIdx(), serviceOld.getName(), serviceOld.getNid(), serviceOld.getPpr(), serviceOld.getLine(), serviceOld.getFlag(), serviceOld.getNeew()));
+                    servicesLost.add(new DVBService(serviceOld.getType(), serviceOld.getIdx(), serviceOld.getName(), serviceOld.getNid(), serviceOld.getPpr(), serviceOld.getLine(), serviceOld.getFlag(), serviceOld.getNeew()));
                 }
             }
         }catch (Exception e) {
@@ -121,7 +121,7 @@ public class Compare_mw_s1 {
         }
     }
     
-    private void showOldPPR(Stage primaryStage, List<Service> services) {
+    private void showOldPPR(Stage primaryStage, List<DVBService> services) {
         try {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getClassLoader().getResource("vigica/view/FXMLCompare.fxml"));
@@ -145,7 +145,7 @@ public class Compare_mw_s1 {
         }
     }
     
-    public class CompareTask extends Task<List<Service>> {
+    public class CompareTask extends Task<List<DVBService>> {
 
         private File chemin;
         Stage stage;
@@ -167,10 +167,10 @@ public class Compare_mw_s1 {
         }
 
         @Override
-        protected List<Service> call() throws Exception {
-            List<Service> services;
-            List<Service> servicesOld;
-            List<Service> servicesNew;
+        protected List<DVBService> call() throws Exception {
+            List<DVBService> services;
+            List<DVBService> servicesOld;
+            List<DVBService> servicesNew;
             int count = 0;
 
             updateProgress(-1, 0);
@@ -183,7 +183,7 @@ public class Compare_mw_s1 {
             integratePPR(services, servicesOld);
             servicesNew = getLostServices();
             bdd.truncate_bdd();
-            for(Service service : services){
+            for(DVBService service : services){
                 count++;
                 updateProgress(count, services.size());
                 bdd.save_bdd(service);

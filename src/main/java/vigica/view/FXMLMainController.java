@@ -52,7 +52,7 @@ import org.hibernate.HibernateException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import vigica.model.Service;
+import vigica.model.DVBService;
 import vigica.service.BeanFactory;
 import vigica.service.IService;
 import vigica.tools.Compare_mw_s1;
@@ -82,26 +82,26 @@ public class FXMLMainController implements Initializable {
     /**
     * The data as an observable list of Service.
     */
-    private ObservableList<Service> serviceData = FXCollections.observableArrayList();
+    private ObservableList<DVBService> serviceData = FXCollections.observableArrayList();
 
     private File currentDir = new File("C:/dev/git/perso/Vigica_Edit/src/test/resources");
 
     @FXML
     private Stage stage;
     @FXML
-    private TableView<Service> serviceTable;
+    private TableView<DVBService> serviceTable;
     @FXML
-    private TableColumn<Service, Integer> s_idxColumn;
+    private TableColumn<DVBService, Integer> s_idxColumn;
     @FXML
-    private TableColumn<Service, String> s_nameColumn;
+    private TableColumn<DVBService, String> s_nameColumn;
     @FXML
-    private TableColumn<Service, String> s_typeColumn;
+    private TableColumn<DVBService, String> s_typeColumn;
     @FXML
-    private TableColumn<Service, Integer> s_nidColumn;
+    private TableColumn<DVBService, Integer> s_nidColumn;
     @FXML
-    private TableColumn<Service, String> s_pprColumn;
+    private TableColumn<DVBService, String> s_pprColumn;
     @FXML
-    private TableColumn<Service, String> s_newColumn;
+    private TableColumn<DVBService, String> s_newColumn;
     @FXML
     private TextField s_idx;
     @FXML
@@ -133,17 +133,17 @@ public class FXMLMainController implements Initializable {
         s_newColumn.setCellValueFactory(cellData -> cellData.getValue().neewProperty());
         
         // Context menu
-        serviceTable.setRowFactory(new Callback<TableView<Service>, TableRow<Service>>() {
+        serviceTable.setRowFactory(new Callback<TableView<DVBService>, TableRow<DVBService>>() {
             @Override
-            public TableRow<Service> call(TableView<Service> tableView) {
-                final TableRow<Service> row = new TableRow<>();
+            public TableRow<DVBService> call(TableView<DVBService> tableView) {
+                final TableRow<DVBService> row = new TableRow<>();
                 final ContextMenu rowMenu = new ContextMenu();
 
                 final MenuItem removeItem = new MenuItem("Delete");
                 removeItem.setOnAction(new EventHandler<ActionEvent>() {
                     @Override
                     public void handle(ActionEvent event) {
-                        final Service service = row.getItem();
+                        final DVBService service = row.getItem();
                         serviceData.removeAll(service);
                         
                         try {
@@ -164,10 +164,10 @@ public class FXMLMainController implements Initializable {
             }
         });
     
-        s_pprColumn.setCellFactory(new Callback<TableColumn<Service, String>, TableCell<Service, String>>() {
+        s_pprColumn.setCellFactory(new Callback<TableColumn<DVBService, String>, TableCell<DVBService, String>>() {
             @Override
-            public TableCell<Service, String> call(TableColumn<Service, String> col) {
-                final TableCell<Service, String> cell = new TableCell<>();
+            public TableCell<DVBService, String> call(TableColumn<DVBService, String> col) {
+                final TableCell<DVBService, String> cell = new TableCell<>();
                 
                 cell.textProperty().bind(cell.itemProperty());
                 cell.itemProperty().addListener(new ChangeListener<String>() {
@@ -188,7 +188,7 @@ public class FXMLMainController implements Initializable {
                                     @Override
                                     public void changed(ObservableValue<? extends Boolean> obs1, Boolean old_val, Boolean new_val) {
                                         final String new_ppr;
-                                        final Service service = (Service) cell.getTableRow().getItem();
+                                        final DVBService service = (DVBService) cell.getTableRow().getItem();
 
                                         if (new_val == true) {
                                             new_ppr = Decompress_mw_s1.add_ppr(cell.getText(), line);
@@ -221,16 +221,16 @@ public class FXMLMainController implements Initializable {
         });
         
         // Editable service name
-        s_nameColumn.setCellFactory(new Callback<TableColumn<Service, String>, TableCell<Service, String>>() {
+        s_nameColumn.setCellFactory(new Callback<TableColumn<DVBService, String>, TableCell<DVBService, String>>() {
             @Override
-            public TableCell<Service, String> call(TableColumn<Service, String> p) {
+            public TableCell<DVBService, String> call(TableColumn<DVBService, String> p) {
                 return new EditingCell();
             }
         });
-        s_nameColumn.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<Service, String>>() {
+        s_nameColumn.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<DVBService, String>>() {
             @Override
-            public void handle(TableColumn.CellEditEvent<Service, String> t) {
-                final Service service = t.getTableView().getItems().get(t.getTablePosition().getRow());
+            public void handle(TableColumn.CellEditEvent<DVBService, String> t) {
+                final DVBService service = t.getTableView().getItems().get(t.getTablePosition().getRow());
                 
                 try {
                     service.setName(t.getNewValue());
@@ -249,7 +249,7 @@ public class FXMLMainController implements Initializable {
 
         stage = (Stage) serviceTable.getScene().getWindow();
         fileChooser.setTitle("Open Services File");
-        fileChooser.setInitialDirectory(currentDir);
+        fileChooser.setInitialDirectory(currentDir.exists() ? currentDir : null);
         File file = fileChooser.showOpenDialog(stage);
 
         if (file != null) {
@@ -292,7 +292,7 @@ public class FXMLMainController implements Initializable {
             return;
         }
         fileChooser.setTitle("Open Old Services");
-        fileChooser.setInitialDirectory(currentDir);
+        fileChooser.setInitialDirectory(currentDir.exists() ? currentDir : null);
         File file = fileChooser.showOpenDialog(stage);
 
         if (file != null) {
@@ -332,7 +332,7 @@ public class FXMLMainController implements Initializable {
             return;
         }
         fileChooser.setTitle("Export Services");
-        fileChooser.setInitialDirectory(currentDir);
+        fileChooser.setInitialDirectory(currentDir.exists() ? currentDir : null);
         File file = fileChooser.showSaveDialog(stage);
 
         if (file != null) {
@@ -352,7 +352,6 @@ public class FXMLMainController implements Initializable {
                     error_msg.Error_diag("Error compare services\n" + generate.generateTask.getException().getMessage());
                 }
             });
-            
 
             generate.generateTask.setChemin(file);
             new Thread(generate.generateTask).start();
@@ -366,7 +365,8 @@ public class FXMLMainController implements Initializable {
     private void handleFilterAction(ActionEvent event) {
 
     	Integer idx = (s_idx.getText() == null || s_idx.getText().isEmpty() ? null : Integer.valueOf(s_idx.getText()));
-        List<Service> services = serviceDB.read_bdd(idx, s_type.getText(), s_name.getText());
+        // List<DVBService> services = serviceDB.read_bdd(idx, s_type.getText(), s_name.getText());
+    	List<DVBService> services = serviceDB.read_bdd("%" + s_name.getText() + "%");
         serviceData.setAll(services);
     }
     
@@ -394,7 +394,7 @@ public class FXMLMainController implements Initializable {
         new Thread(decompress.duplicateTask).start();
     }
     
-    class EditingCell extends TableCell<Service, String> {
+    class EditingCell extends TableCell<DVBService, String> {
 
         private TextField textField;
 

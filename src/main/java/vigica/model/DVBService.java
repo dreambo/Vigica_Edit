@@ -35,7 +35,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="SERVICE")
-public class Service {
+public class DVBService {
 
 	@Id
     private final StringProperty type;
@@ -51,7 +51,7 @@ public class Service {
     /**
     * Default constructor.
     */
-    public Service() {
+    public DVBService() {
         this.type = new SimpleStringProperty("");
         this.idx = new SimpleIntegerProperty(0);
         this.name = new SimpleStringProperty("");
@@ -62,7 +62,7 @@ public class Service {
         this.neew = new SimpleStringProperty("");
     }
     
-    public Service(String stype, Integer recd_idx, String rcdname_s, Integer nid_d, String ppr_s, String line_s, Boolean flag_b, String new_b) {
+    public DVBService(String stype, Integer recd_idx, String rcdname_s, Integer nid_d, String ppr_s, String line_s, Boolean flag_b, String new_b) {
         this.type = new SimpleStringProperty(stype);
         this.idx = new SimpleIntegerProperty(recd_idx);
         this.name = new SimpleStringProperty(rcdname_s);

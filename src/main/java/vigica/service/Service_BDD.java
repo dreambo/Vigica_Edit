@@ -25,7 +25,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
-import vigica.model.Service;
+import vigica.model.DVBService;
 import vigica.tools.HibernateUtil;
 import vigica.view.Error_Msg;
 
@@ -41,7 +41,7 @@ public class Service_BDD implements IService {
 	 * @see vigica.IService#read_bdd()
 	 */
     @Override
-	public List<Service> read_bdd() throws HibernateException {
+	public List<DVBService> read_bdd() throws HibernateException {
         return read_bdd(null, null, null);
     }
     
@@ -49,9 +49,9 @@ public class Service_BDD implements IService {
 	 * @see vigica.IService#read_bdd(java.lang.String)
 	 */
     @Override
-	public List<Service> read_bdd(Integer idx, String type, String name) throws HibernateException {
+	public List<DVBService> read_bdd(Integer idx, String type, String name) throws HibernateException {
 
-    	List<Service> services = new ArrayList<>();
+    	List<DVBService> services = new ArrayList<>();
 
         String sql = "FROM Service WHERE 1=1 ";
         if (idx != null) {
@@ -75,9 +75,9 @@ public class Service_BDD implements IService {
             tx = session.beginTransaction();
             Query q = session.createQuery(sql);
 
-            for (Iterator<Service> it = q.iterate(); it.hasNext();) {
-                Service result = it.next();
-                Service service = new Service(result.getType(), result.getIdx(), result.getName(), result.getNid(), result.getPpr(), result.getLine(), result.getFlag(), result.getNeew());
+            for (Iterator<DVBService> it = q.iterate(); it.hasNext();) {
+                DVBService result = it.next();
+                DVBService service = new DVBService(result.getType(), result.getIdx(), result.getName(), result.getNid(), result.getPpr(), result.getLine(), result.getFlag(), result.getNeew());
                 services.add(service);
             }
             tx.commit();
@@ -96,7 +96,7 @@ public class Service_BDD implements IService {
 	 * @see vigica.IService#save_bdd(vigica.model.Service)
 	 */
     @Override
-	public void save_bdd (Service service)  throws HibernateException {
+	public void save_bdd (DVBService service)  throws HibernateException {
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = null;
         
@@ -117,8 +117,8 @@ public class Service_BDD implements IService {
 	 * @see vigica.IService#save_bdd(java.util.List)
 	 */
     @Override
-	public void save_bdd (List<Service> services)  throws HibernateException {
-        for(Service service : services){
+	public void save_bdd (List<DVBService> services)  throws HibernateException {
+        for(DVBService service : services){
             save_bdd(service);
         }
     }
@@ -127,7 +127,7 @@ public class Service_BDD implements IService {
 	 * @see vigica.IService#update_bdd(vigica.model.Service)
 	 */
     @Override
-	public void update_bdd (Service service)  throws HibernateException {
+	public void update_bdd (DVBService service)  throws HibernateException {
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = null;
         
@@ -148,7 +148,7 @@ public class Service_BDD implements IService {
 	 * @see vigica.IService#delete_bdd(vigica.model.Service)
 	 */
     @Override
-	public void delete_bdd (Service service) throws HibernateException {
+	public void delete_bdd (DVBService service) throws HibernateException {
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = null;
         
@@ -188,4 +188,10 @@ public class Service_BDD implements IService {
             session.close();
         }
     }
+
+	@Override
+	public List<DVBService> read_bdd(String name) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

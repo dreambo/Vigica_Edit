@@ -32,7 +32,7 @@ import javafx.concurrent.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import vigica.model.Service;
+import vigica.model.DVBService;
 import vigica.service.BeanFactory;
 import vigica.service.IService;
 import vigica.view.Error_Msg;
@@ -52,9 +52,9 @@ public class Decompress_mw_s1 {
     public DecompressTask decompressTask;
     public DuplicateTask duplicateTask;
     
-    public List<Service> services = new ArrayList<>();
+    public List<DVBService> services = new ArrayList<>();
 
-    public List<Service> getServices() {
+    public List<DVBService> getServices() {
         return services;
     }
     
@@ -118,7 +118,7 @@ public class Decompress_mw_s1 {
                 String rcdname_s = new String(rcdname, "UTF-8");
                 String binrcd_s = bytesToHexString(binrcd);
 //            String asciiname = stype + "~" + recd_idx + "~" + rcdname_s + "~E0~" + "N" + nid_d + "~" + "P" + ppr_s;
-                services.add(new Service(stype, recd_idx, rcdname_s, nid_d, ppr_s,binrcd_s, false, ""));
+                services.add(new DVBService(stype, recd_idx, rcdname_s, nid_d, ppr_s,binrcd_s, false, ""));
                 recd_idx++;
                 bind_idx = nxt_idx;
             }
@@ -250,7 +250,7 @@ public class Decompress_mw_s1 {
         return new_ppr;
     }
     
-    public class DecompressTask extends Task<List<Service>> {
+    public class DecompressTask extends Task<List<DVBService>> {
 
         private File chemin;
 
@@ -263,8 +263,8 @@ public class Decompress_mw_s1 {
         }
 
         @Override
-        protected List<Service> call() throws Exception {
-            List<Service> services;
+        protected List<DVBService> call() throws Exception {
+            List<DVBService> services;
             int count = 0;
 
             updateProgress(-1, 0);
@@ -273,7 +273,7 @@ public class Decompress_mw_s1 {
 
             // Add to database
             bdd.truncate_bdd();
-            for(Service service : services){
+            for(DVBService service : services){
                 count++;
                 updateProgress(count, services.size());
                 bdd.save_bdd(service);
@@ -283,21 +283,21 @@ public class Decompress_mw_s1 {
         };
     }
 
-    public class DuplicateTask extends Task<List<Service>> {
+    public class DuplicateTask extends Task<List<DVBService>> {
 
-        ObservableList<Service> services = FXCollections.observableArrayList();
+        ObservableList<DVBService> services = FXCollections.observableArrayList();
 
-        public ObservableList<Service> getServices() {
+        public ObservableList<DVBService> getServices() {
             return this.services;
         }
 
-        public void setServices(ObservableList<Service> services) {
+        public void setServices(ObservableList<DVBService> services) {
             this.services = services;
         }
 
         @Override
-        protected List<Service> call() throws Exception {
-            List<Service> servicesUnique = new ArrayList<>();
+        protected List<DVBService> call() throws Exception {
+            List<DVBService> servicesUnique = new ArrayList<>();
             int count = 0;
 
             updateProgress(-1, 0);
@@ -305,7 +305,7 @@ public class Decompress_mw_s1 {
             
             int i=1;
 
-            for (Service service :this.services) {
+            for (DVBService service :this.services) {
                 if (!uniqueId.contains(service.getName()) || !service.getPpr().equals("")) {
                     service.setIdx(i);
                     servicesUnique.add(service);

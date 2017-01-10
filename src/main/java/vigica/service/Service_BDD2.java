@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import vigica.model.Service;
+import vigica.model.DVBService;
 
 @org.springframework.stereotype.Service
 public class Service_BDD2 implements IService {
@@ -13,37 +13,43 @@ public class Service_BDD2 implements IService {
     private ServiceRepository repository = BeanFactory.getBean(ServiceRepository.class);
 
     @Override
-	public List<Service> read_bdd() {
+	public List<DVBService> read_bdd() {
 
     	return repository.findAll();
     }
 
     @Override
-	public List<Service> read_bdd(Integer idx, String type, String name) {
+	public List<DVBService> read_bdd(Integer idx, String type, String name) {
 
         return repository.getService(idx, type, name);
     }
     
     @Override
-	public void save_bdd(Service service)  {
+	public List<DVBService> read_bdd(String name) {
+
+        return repository.getService(name);
+    }
+    
+    @Override
+	public void save_bdd(DVBService service)  {
 
     	repository.save(service);
     }
     
     @Override
-	public void save_bdd (List<Service> services)  {
+	public void save_bdd (List<DVBService> services)  {
 
     	repository.save(services);
     }
     
     @Override
-	public void update_bdd(Service service)  {
+	public void update_bdd(DVBService service)  {
 
     	repository.save(service);
     }
     
     @Override
-	public void delete_bdd (Service service) {
+	public void delete_bdd (DVBService service) {
 
     	repository.delete(service);
     }

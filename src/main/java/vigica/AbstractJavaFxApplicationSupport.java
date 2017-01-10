@@ -44,7 +44,6 @@ public abstract class AbstractJavaFxApplicationSupport extends Application {
 
 	protected static void launchApp(Class<? extends AbstractJavaFxApplicationSupport> appClass, String[] args) {
 
-		AbstractJavaFxApplicationSupport.savedArgs = args;
-		Application.launch(appClass, args);
+		Application.launch(appClass, savedArgs = args);
 	}
 }

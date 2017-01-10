@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
-  <class name="vigica.model.Service" table="SERVICE">
+  <class name="vigica.model.DVBService" table="SERVICE">
     <id column="IDX" name="idx" type="int"/>
     <property column="TYPE" name="type" type="string"/>
     <property column="NAME" name="name" type="string"/>

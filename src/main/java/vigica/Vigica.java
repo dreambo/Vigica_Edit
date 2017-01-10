@@ -74,7 +74,7 @@ public class Vigica extends AbstractJavaFxApplicationSupport {
             // Show the scene containing the root layout.
             Scene scene = new Scene(rootLayout);
             primaryStage.setScene(scene);
-            primaryStage.setResizable(true);
+            primaryStage.setResizable(false);
             primaryStage.show();
 
         } catch (IOException e) {
@@ -105,11 +105,7 @@ public class Vigica extends AbstractJavaFxApplicationSupport {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-/*
-		ApplicationContext ctx = SpringApplication.run(Vigica.class, args);
-    	String[] beanNames = ctx.getBeanDefinitionNames();
-		Stream.of(beanNames).sorted().forEach(x -> System.out.println(x + " -> " + ctx.getBean(x)));
-*/
+
     	launchApp(Vigica.class, args);
     }
 }

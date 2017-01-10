@@ -27,7 +27,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import vigica.model.Service;
+import vigica.model.DVBService;
 
 /**
  *
@@ -38,23 +38,23 @@ public class FXMLCompareController implements Initializable {
     /**
     * The data as an observable list of Service.
     */
-    private List<Service> services = new ArrayList<>();
-    private ObservableList<Service> serviceData = FXCollections.observableArrayList();
+    private List<DVBService> services = new ArrayList<>();
+    private ObservableList<DVBService> serviceData = FXCollections.observableArrayList();
     
 //    @FXML
 //    private Stage stage;
     @FXML
-    private TableView<Service> serviceTable;
+    private TableView<DVBService> serviceTable;
     @FXML
-    private TableColumn<Service, Integer> s_idxColumn;
+    private TableColumn<DVBService, Integer> s_idxColumn;
     @FXML
-    private TableColumn<Service, String> s_nameColumn;
+    private TableColumn<DVBService, String> s_nameColumn;
     @FXML
-    private TableColumn<Service, String> s_typeColumn;
+    private TableColumn<DVBService, String> s_typeColumn;
     @FXML
-    private TableColumn<Service, Integer> s_nidColumn;
+    private TableColumn<DVBService, Integer> s_nidColumn;
     @FXML
-    private TableColumn<Service, String> s_pprColumn;
+    private TableColumn<DVBService, String> s_pprColumn;
 
     /**
      * The constructor.
@@ -63,7 +63,7 @@ public class FXMLCompareController implements Initializable {
     public FXMLCompareController() {
     }
     
-    public void setServices(List<Service> services) {
+    public void setServices(List<DVBService> services) {
         serviceData.setAll(services);
         serviceTable.setItems(serviceData);
     }
