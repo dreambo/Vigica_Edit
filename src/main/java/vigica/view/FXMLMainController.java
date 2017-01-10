@@ -21,6 +21,10 @@ import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import org.hibernate.HibernateException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -47,11 +51,6 @@ import javafx.scene.input.KeyEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-
-import org.hibernate.HibernateException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import vigica.model.DVBService;
 import vigica.service.BeanFactory;
 import vigica.service.IService;
@@ -84,7 +83,7 @@ public class FXMLMainController implements Initializable {
     */
     private ObservableList<DVBService> serviceData = FXCollections.observableArrayList();
 
-    private File currentDir = new File("C:/dev/git/perso/Vigica_Edit/src/test/resources");
+    private File currentDir = new File("src/test/resources");
 
     @FXML
     private Stage stage;
