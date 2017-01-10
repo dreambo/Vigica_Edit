@@ -7,7 +7,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane id="AnchorPane" prefHeight="910.0" prefWidth="1130.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="vigica_edit.view.FXMLMainController">
+<AnchorPane id="AnchorPane" prefHeight="910.0" prefWidth="1130.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="vigica.view.FXMLMainController">
     <children>
       <Button fx:id="button1" onAction="#handleImportAction" prefHeight="31.0" prefWidth="125.0" text="Import" textAlignment="CENTER" />
       <Button fx:id="button2" layoutX="140.0" onAction="#handleExportAction" prefHeight="31.0" prefWidth="125.0" text="Export" textAlignment="CENTER" />
