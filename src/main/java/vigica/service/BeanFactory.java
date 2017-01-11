@@ -15,7 +15,7 @@ public class BeanFactory implements ApplicationContextAware {
 	}
 
 	public static IService getService() {
-		return getBean(Service_BDD2.class);
+		return getBean(Service_BDD.class);
 		// return new Service_BDD2();
 	}
 

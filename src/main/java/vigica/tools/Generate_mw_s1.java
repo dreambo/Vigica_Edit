@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import vigica.model.DVBService;
+import vigica.service.BeanFactory;
 import vigica.service.IService;
 
 /**
@@ -38,7 +39,7 @@ import vigica.service.IService;
 public class Generate_mw_s1 {
 
 	@Autowired
-    private IService bdd; // = BeanFactory.getService();
+    private IService bdd = BeanFactory.getService();
 
 	public GenerateTask generateTask;
 

@@ -19,6 +19,7 @@ package vigica;
 import java.io.IOException;
 import java.net.URL;
 
+import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.application.Preloader;
 import javafx.fxml.FXMLLoader;
@@ -27,7 +28,9 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Lazy;
 
 /**
@@ -37,12 +40,26 @@ import org.springframework.context.annotation.Lazy;
  */
 @Lazy
 @SpringBootApplication
-public class Vigica extends AbstractJavaFxApplicationSupport {
+public class Vigica extends Application {
+
+	private static String[] args;
 
     private Stage primaryStage;
     private AnchorPane rootLayout;
+	private ConfigurableApplicationContext applicationContext;
 
-    public Vigica() {}
+	@Override
+	public void init() throws Exception {
+		applicationContext = SpringApplication.run(getClass(), args);
+		applicationContext.getAutowireCapableBeanFactory().autowireBean(this);
+	}
+
+	@Override
+	public void stop() throws Exception {
+
+		super.stop();
+		applicationContext.close();
+	}
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -106,6 +123,6 @@ public class Vigica extends AbstractJavaFxApplicationSupport {
      */
     public static void main(String[] args) {
 
-    	launchApp(Vigica.class, args);
+    	launch(Vigica.class, Vigica.args = args);
     }
 }

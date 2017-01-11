@@ -10,8 +10,6 @@ public interface IService {
 
 	public abstract List<DVBService> read_bdd() throws HibernateException;
 
-	public abstract List<DVBService> read_bdd(Integer idx, String type, String name);
-
 	public abstract List<DVBService> read_bdd(String name);
 
 	public abstract void save_bdd(DVBService service) throws HibernateException;
