@@ -16,8 +16,8 @@
  */
 package vigica.view;
 
-// import javafx.scene.control.Alert;
-// import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 
 
 /**
@@ -27,24 +27,20 @@ package vigica.view;
 public class Error_Msg {
     
     public void Error_diag(String msg) {
-    	/*
         Alert alert = new Alert(AlertType.ERROR);
         alert.setTitle("Error");
         alert.setHeaderText(null);
         alert.setContentText(msg);
 
         alert.showAndWait();
-        */
     }
     
     public void Info_diag(String msg) {
-    	/*
         Alert alert = new Alert(AlertType.INFORMATION);
         alert.setTitle("Info");
         alert.setHeaderText(null);
         alert.setContentText(msg);
 
         alert.showAndWait();
-		*/
     }
 }
