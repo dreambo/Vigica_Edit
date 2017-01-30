@@ -37,15 +37,13 @@ import javax.persistence.Table;
 @Table(name="SERVICE")
 public class DVBService {
 
-	@Id
-    private final StringProperty type;
     private final IntegerProperty idx;
+    private final StringProperty type;
     private final StringProperty name;
     private final IntegerProperty nid;
     private final StringProperty ppr;
     private final StringProperty line;
     private final BooleanProperty flag;
-    @Column(name="NEW")
     private final StringProperty neew;
     
     /**
@@ -73,10 +71,18 @@ public class DVBService {
         this.neew = new SimpleStringProperty(new_b);
     }
 
+	@Id
+	@Column(columnDefinition="INTEGER NOT NULL")
+    public int getIdx() {
+        return idx.get();
+    }
+    public void setIdx(int idx) {
+        this.idx.set(idx);
+    }
+
     public String getType() {
         return type.get();
     }
-
     public void setType(String type) {
         this.type.set(type);
     }
@@ -85,14 +91,6 @@ public class DVBService {
         return type;
     }
     
-    public int getIdx() {
-        return idx.get();
-    }
-
-    public void setIdx(int idx) {
-        this.idx.set(idx);
-    }
-
     public IntegerProperty idxProperty() {
         return idx;
     }
@@ -112,7 +110,6 @@ public class DVBService {
     public int getNid() {
         return nid.get();
     }
-
     public void setNid(int nid) {
         this.nid.set(nid);
     }
@@ -124,7 +121,6 @@ public class DVBService {
     public String getPpr() {
         return ppr.get();
     }
-
     public void setPpr(String ppr) {
         this.ppr.set(ppr);
     }
@@ -133,10 +129,10 @@ public class DVBService {
         return ppr;
     }
     
+    @Column(length=1024)
     public String getLine() {
         return line.get();
     }
-
     public void setLine(String line) {
         this.line.set(line);
     }
@@ -148,7 +144,6 @@ public class DVBService {
     public Boolean getFlag() {
         return flag.get();
     }
-
     public void setFlag(Boolean flag) {
         this.flag.set(flag);
     }
@@ -157,10 +152,10 @@ public class DVBService {
         return flag;
     }
     
+    @Column(name="NEW")
     public String getNeew() {
         return neew.get();
     }
-
     public void setNeew(String neew) {
         this.neew.set(neew);
     }

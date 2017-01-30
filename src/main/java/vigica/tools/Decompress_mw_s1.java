@@ -266,6 +266,8 @@ public class Decompress_mw_s1 {
         protected List<DVBService> call() throws Exception {
             List<DVBService> services;
             int count = 0;
+            int countOK = 0;
+            int countKO = 0;
 
             updateProgress(-1, 0);
             decompress(chemin);
@@ -273,12 +275,20 @@ public class Decompress_mw_s1 {
 
             // Add to database
             bdd.truncate_bdd();
-            for(DVBService service : services){
+            DVBService service2 = null;
+            for(DVBService service : services) try {
                 count++;
                 updateProgress(count, services.size());
+                service2 = service;
                 bdd.save_bdd(service);
+                countOK++;
+            } catch(Exception e) {
+            	e.printStackTrace();
+            	System.out.println(service2);
+                countKO++;
             }
 
+            System.out.println("count: " + count + " countOK: " + countOK + " countKO: " + countKO);
             return services;
         };
     }
