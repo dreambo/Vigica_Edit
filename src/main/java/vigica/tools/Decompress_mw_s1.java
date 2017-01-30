@@ -72,7 +72,8 @@ public class Decompress_mw_s1 {
      * @throws java.lang.Exception
      */
     public void decompress(File chemin) throws Exception {
-        byte[] bindata;
+
+    	byte[] bindata;
         services.clear();
         
         try {
@@ -266,26 +267,20 @@ public class Decompress_mw_s1 {
 
         private File chemin;
 
-        public File getChemin() {
-            return this.chemin;
-        }
-
         public void setChemin(File chemin) {
             this.chemin = chemin;
         }
 
         @Override
         protected List<DVBService> call() throws Exception {
-            List<DVBService> services;
+
             int countOK = 0;
             int countKO = 0;
 
             updateProgress(-1, 0);
             decompress(chemin);
-            services = getServices();
 
             // Add to database
-            bdd.truncate_bdd();
             for (DVBService service : services) try {
                 updateProgress(countOK + countKO, services.size());
                 bdd.save_bdd(service);
@@ -317,21 +312,20 @@ public class Decompress_mw_s1 {
             List<DVBService> servicesUnique = new ArrayList<>();
 
             updateProgress(-1, 0);
-            List<String> uniqueId = new ArrayList<>();
+            List<String> uniqueIds = new ArrayList<>();
             
             int i=1;
 
-            for (DVBService service :this.services) {
-                if (!uniqueId.contains(service.getName()) || !service.getPpr().equals("")) {
+            for (DVBService service: services) {
+                if (!uniqueIds.contains(service.getName()) || !service.getPpr().equals("")) {
                     service.setIdx(i);
                     servicesUnique.add(service);
                     i++;
-                    uniqueId.add(service.getName());
+                    uniqueIds.add(service.getName());
                 }
             }
 
             // Add to database
-            bdd.truncate_bdd();
             bdd.save_bdd(servicesUnique);
 
             return servicesUnique;

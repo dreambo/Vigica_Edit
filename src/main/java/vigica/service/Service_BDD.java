@@ -10,7 +10,7 @@ import vigica.model.DVBService;
 public class Service_BDD implements IService {
 
 	@Autowired
-    private ServiceRepository repository = BeanFactory.getBean(ServiceRepository.class);
+    private ServiceRepository repository; // = BeanFactory.getBean(ServiceRepository.class);
 
     @Override
 	public List<DVBService> read_bdd() {
@@ -46,11 +46,5 @@ public class Service_BDD implements IService {
 	public void delete_bdd (DVBService service) {
 
     	repository.delete(service);
-    }
-    
-    @Override
-	public void truncate_bdd() {
-
-    	repository.deleteAll();
     }
 }

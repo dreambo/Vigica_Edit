@@ -20,6 +20,4 @@ public interface IService {
 
 	public abstract void delete_bdd(DVBService service) throws HibernateException;
 
-	public abstract void truncate_bdd() throws HibernateException;
-
 }

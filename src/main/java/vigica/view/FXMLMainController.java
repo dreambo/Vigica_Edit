@@ -30,6 +30,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Worker.State;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -116,9 +117,8 @@ public class FXMLMainController implements Initializable {
      * The constructor.
      * The constructor is called before the initialize() method.
      */
-    public FXMLMainController() {
-    }
-    
+    public FXMLMainController() {}
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         pi.setVisible(false);
@@ -243,7 +243,7 @@ public class FXMLMainController implements Initializable {
     }
     
     @FXML
-    private void handleImportAction(ActionEvent event) throws Exception {
+    private void openAction(ActionEvent event) throws Exception {
 
         stage = (Stage) serviceTable.getScene().getWindow();
         fileChooser.setTitle("Open Services File");
@@ -251,11 +251,13 @@ public class FXMLMainController implements Initializable {
         File file = fileChooser.showOpenDialog(stage);
 
         if (file != null) {
-            
+
             currentDir = file.getParentFile();
+            decompress = new Decompress_mw_s1();
 
             pi.visibleProperty().bind(decompress.decompressTask.runningProperty());
             pi.progressProperty().bind(decompress.decompressTask.progressProperty());
+
             decompress.decompressTask.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
                 @Override
                 public void handle(WorkerStateEvent t) {
@@ -271,7 +273,9 @@ public class FXMLMainController implements Initializable {
                     error_msg.Error_diag("Error save BDD\n" + decompress.decompressTask.getException().getMessage());
                 }
             });
-            
+
+            State state = decompress.decompressTask.getState();
+            System.out.println(state);
 
             decompress.decompressTask.setChemin(file);
             new Thread(decompress.decompressTask).start();
@@ -322,7 +326,7 @@ public class FXMLMainController implements Initializable {
     }
     
     @FXML
-    private void handleExportAction(ActionEvent event) {
+    private void saveAction(ActionEvent event) {
 
         stage = (Stage) serviceTable.getScene().getWindow();
         if (serviceData.size() == 0) {

@@ -72,7 +72,6 @@ public class DVBService {
     }
 
 	@Id
-	@Column(columnDefinition="INTEGER NOT NULL")
     public int getIdx() {
         return idx.get();
     }

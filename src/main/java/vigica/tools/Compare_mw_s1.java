@@ -46,12 +46,12 @@ public class Compare_mw_s1 {
 
 	public List<DVBService> servicesLost = new ArrayList<>();
     public CompareTask compareTask;
-    
+
     @Autowired
     private Decompress_mw_s1 decompress = new Decompress_mw_s1();
     @Autowired
     private IService bdd = BeanFactory.getService();
-    
+
     private List<DVBService> getLostServices() {
         return servicesLost;
     }
@@ -182,7 +182,7 @@ public class Compare_mw_s1 {
             detectNew(services, servicesOld);
             integratePPR(services, servicesOld);
             servicesNew = getLostServices();
-            bdd.truncate_bdd();
+
             for(DVBService service : services){
                 count++;
                 updateProgress(count, services.size());

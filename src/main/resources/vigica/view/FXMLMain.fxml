@@ -9,8 +9,8 @@
 
 <AnchorPane id="AnchorPane" prefHeight="910.0" prefWidth="1130.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="vigica.view.FXMLMainController">
     <children>
-      <Button fx:id="button1" onAction="#handleImportAction" prefHeight="31.0" prefWidth="125.0" text="Import" textAlignment="CENTER" />
-      <Button fx:id="button2" layoutX="140.0" onAction="#handleExportAction" prefHeight="31.0" prefWidth="125.0" text="Export" textAlignment="CENTER" />
+      <Button fx:id="button1" onAction="#openAction" prefHeight="31.0" prefWidth="125.0" text="Open" textAlignment="CENTER" />
+      <Button fx:id="button2" layoutX="140.0" onAction="#saveAction" prefHeight="31.0" prefWidth="125.0" text="Save" textAlignment="CENTER" />
       <Button fx:id="button3" layoutX="280.0" onAction="#handleCompareAction" prefHeight="31.0" prefWidth="125.0" text="Compare" textAlignment="CENTER" />
       <Button fx:id="button5" layoutX="414.0" onAction="#handleDuplicateAction" prefHeight="31.0" prefWidth="125.0" text="Duplicate !" textAlignment="CENTER" />
       <TextField fx:id="s_name" layoutX="193.0" layoutY="35.0" prefHeight="31.0" prefWidth="350.0" promptText="Name" onAction="#handleFilterAction" />

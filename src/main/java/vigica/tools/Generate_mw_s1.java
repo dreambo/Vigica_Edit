@@ -152,7 +152,8 @@ public class Generate_mw_s1 {
     }
 
     private List<Byte> getppr(String preference) {
-        List<Byte> ppr = new ArrayList<>(2);
+
+    	List<Byte> ppr = new ArrayList<>(2);
         ppr.add((byte) 0x00);
         ppr.add((byte) 0x00);
 
@@ -170,16 +171,13 @@ public class Generate_mw_s1 {
                 }
             }
         }
+
         return ppr;
     }
     
     public class GenerateTask extends Task<Void> {
 
         private File chemin;
-        
-        public File getChemin() {
-            return this.chemin;
-        }
 
         public void setChemin(File chemin) {
             this.chemin = chemin;
@@ -187,11 +185,9 @@ public class Generate_mw_s1 {
 
         @Override
         protected Void call() throws Exception {
-            List<DVBService> services;
-            int count = 0;
 
             updateProgress(-1, 0);
-            services = bdd.read_bdd();
+            List<DVBService> services = bdd.read_bdd();
 
             compress(services, chemin);
 
