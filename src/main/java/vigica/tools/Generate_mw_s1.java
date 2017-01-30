@@ -67,10 +67,11 @@ public class Generate_mw_s1 {
 
                 //sdata.set(rcdlen - 8, (byte) 0x01);
                 List<Byte> newn = new ArrayList<>();
-                
-                for (byte c : service.getName().getBytes("UTF-8"))
+
+                for (byte c : service.getName().getBytes("UTF-8")) {
                     newn.add(c);
-                
+                }
+
                 int newl = newn.size();
                 int rcdnamel = Integer.valueOf(sdata.get(1));
                 List<Byte> filler = sdata.subList(2, 2 + 3);

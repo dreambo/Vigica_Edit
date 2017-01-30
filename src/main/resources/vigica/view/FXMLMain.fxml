@@ -13,10 +13,8 @@
       <Button fx:id="button2" layoutX="140.0" onAction="#handleExportAction" prefHeight="31.0" prefWidth="125.0" text="Export" textAlignment="CENTER" />
       <Button fx:id="button3" layoutX="280.0" onAction="#handleCompareAction" prefHeight="31.0" prefWidth="125.0" text="Compare" textAlignment="CENTER" />
       <Button fx:id="button5" layoutX="414.0" onAction="#handleDuplicateAction" prefHeight="31.0" prefWidth="125.0" text="Duplicate !" textAlignment="CENTER" />
-      <TextField fx:id="s_idx" layoutY="35.0" prefHeight="31.0" prefWidth="111.0" promptText="ID" />
-      <TextField fx:id="s_type" layoutX="113.0" layoutY="35.0" prefHeight="31.0" prefWidth="79.0" promptText="Type" />
       <TextField fx:id="s_name" layoutX="193.0" layoutY="35.0" prefHeight="31.0" prefWidth="350.0" promptText="Name" />
-      <Button fx:id="button4" layoutX="551.0" layoutY="35.0" onAction="#handleFilterAction" prefHeight="31.0" prefWidth="125.0" text="Filtter" textAlignment="CENTER" />
+      <Button fx:id="button4" layoutX="551.0" layoutY="35.0" onAction="#handleFilterAction" prefHeight="31.0" prefWidth="125.0" text="Filter" textAlignment="CENTER" />
       <ProgressBar fx:id="pi" layoutX="553.0" layoutY="6.0" prefHeight="23.0" prefWidth="550.0" progress="0.0" />
       <TableView fx:id="serviceTable" layoutX="-5.0" layoutY="71.0" prefHeight="769.0" prefWidth="1024.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="71.0">
         <columns>

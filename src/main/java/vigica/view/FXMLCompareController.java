@@ -17,7 +17,6 @@
 package vigica.view;
 
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -34,15 +33,14 @@ import vigica.model.DVBService;
  * @author bnabi
  */
 public class FXMLCompareController implements Initializable {
-    
+
     /**
     * The data as an observable list of Service.
     */
-    private List<DVBService> services = new ArrayList<>();
     private ObservableList<DVBService> serviceData = FXCollections.observableArrayList();
-    
-//    @FXML
-//    private Stage stage;
+
+    // @FXML
+    // private Stage stage;
     @FXML
     private TableView<DVBService> serviceTable;
     @FXML
@@ -60,14 +58,13 @@ public class FXMLCompareController implements Initializable {
      * The constructor.
      * The constructor is called before the initialize() method.
      */
-    public FXMLCompareController() {
-    }
-    
+    public FXMLCompareController() {}
+
     public void setServices(List<DVBService> services) {
         serviceData.setAll(services);
         serviceTable.setItems(serviceData);
     }
-    
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
 
@@ -76,7 +73,5 @@ public class FXMLCompareController implements Initializable {
         s_typeColumn.setCellValueFactory(cellData -> cellData.getValue().typeProperty());
         s_nidColumn.setCellValueFactory(cellData -> cellData.getValue().nidProperty().asObject());
         s_pprColumn.setCellValueFactory(cellData -> cellData.getValue().pprProperty());
-        
     }
-    
 }

@@ -124,7 +124,7 @@ public class Compare_mw_s1 {
     private void showOldPPR(Stage primaryStage, List<DVBService> services) {
         try {
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(getClass().getClassLoader().getResource("vigica/view/FXMLCompare.fxml"));
+            loader.setLocation(getClass().getResource("/vigica/view/FXMLCompare.fxml"));
             AnchorPane rootLayout = (AnchorPane) loader.load();
 
             FXMLCompareController t1 = (FXMLCompareController)loader.getController();
@@ -134,7 +134,7 @@ public class Compare_mw_s1 {
             modal_dialog.initModality(Modality.NONE);
             modal_dialog.initOwner(primaryStage);
             modal_dialog.setTitle("Lost Preferences");
-            modal_dialog.getIcons().add(new Image(getClass().getResourceAsStream("app_icon.png")));
+            modal_dialog.getIcons().add(new Image(getClass().getResourceAsStream("/app_icon.png")));
 
             // Show the scene containing the root layout.
             Scene scene = new Scene(rootLayout);

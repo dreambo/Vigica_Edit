@@ -29,6 +29,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -44,8 +45,10 @@ import vigica.view.Error_Msg;
  */
 @Component
 public class Decompress_mw_s1 {
-    
-    private final byte[] endpatt = {(byte) 0x00, (byte) 0x00, (byte) 0x3f, (byte) 0xff};
+
+	private static final Logger LOG = Logger.getLogger(Decompress_mw_s1.class);
+
+	private final byte[] endpatt = {(byte) 0x00, (byte) 0x00, (byte) 0x3f, (byte) 0xff};
     static private Error_Msg error_msg = new Error_Msg();
     @Autowired
     private IService bdd = BeanFactory.getService();
@@ -122,7 +125,7 @@ public class Decompress_mw_s1 {
                 recd_idx++;
                 bind_idx = nxt_idx;
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             throw new Exception(e.getCause().getMessage());
         }
     }
@@ -153,75 +156,84 @@ public class Decompress_mw_s1 {
     private String getPreference(byte[] ppr) {
         String ppr_s ="";
         Boolean isFirst = true;
-        
-        for(int i=0; i<8; i++) {
+
+        for (int i = 0; i < 8; i++) {
             if (((ppr[1] >> i) & 1) == 1) {
                 if (isFirst) {
                     ppr_s += (i+1);
                     isFirst = false;
-                }
-                else
+
+                } else {
                     ppr_s += "-" + (i+1);
+                }
             }
         }
-        for(int i=9; i<=10; i++) {
+
+        for (int i = 9; i < 11; i++) {
             if (((ppr[0] >> (i-9)) & 1) == 1) {
-                if (i<10)
+
+            	if (i < 10) {
                     if (isFirst) {
                         ppr_s += (i);
                         isFirst = false;
-                    }
-                    else
+                    } else {
                         ppr_s += "-" + (i);
-                else
+                    }
+                } else {
                     ppr_s += (i);
+                }
             }
         }
+
         return ppr_s;
     }
-    
+
     public static Boolean isPreferenceOn(String ppr_s, int index) {
         Boolean isOk = false;
-        for (String ppr: ppr_s.split("-")){
+        for (String ppr: ppr_s.split("-")) {
             if (ppr.equals(String.valueOf(index))) {
                 isOk = true;
             }
         }
+
         return isOk;
     }
-    
+
     public static String add_ppr(String old_ppr, int new_Value) {
         String new_ppr = "";
         Boolean isFirst = true;
         Boolean isAdded = false;
-        
+
         // not preference yet
-        if (old_ppr.length() == 0)
+        if (old_ppr.length() == 0) {
             return old_ppr += new_Value;
-        for (String ppr: old_ppr.split("-")){
+        }
+
+        for (String ppr: old_ppr.split("-")) {
             // still not in position
             if ((Integer.valueOf(ppr) < new_Value)) {
                 if (isFirst) {
                     new_ppr += ppr;
                     isFirst = false;
-                }
-                else
+                } else {
                     new_ppr += "-" + ppr;
-            }
+                }
             // here we are
-            else if ((Integer.valueOf(ppr) > new_Value) && !isAdded) {
+            } else if ((Integer.valueOf(ppr) > new_Value) && !isAdded) {
                 // expect for 1 to not have a -
-                if (new_Value == 1)
-                    new_ppr += new_Value + "-" + ppr ;
-                else
-                    new_ppr += "-" + new_Value + "-" + ppr ;
+                if (new_Value == 1) {
+                    new_ppr += new_Value + "-" + ppr;
+                } else {
+                    new_ppr += "-" + new_Value + "-" + ppr;
+                }
+
                 isAdded = true;
-            }
             // the rest of the line
-            else {
-                new_ppr += "-" + ppr ;
+            } else {
+                new_ppr += "-" + ppr;
             }
         }
+
         // if new value is the last one we added it manualy
         if (!isAdded) {
             new_ppr += "-" + new_Value;
@@ -238,18 +250,18 @@ public class Decompress_mw_s1 {
             if (Integer.valueOf(ppr) == new_Value) {
                 continue;
             }
-            else {
-                if (isFirst) {
-                    new_ppr += ppr;
-                    isFirst = false;
-                }
-                else
-                    new_ppr += "-" + ppr;
+
+            if (isFirst) {
+                new_ppr += ppr;
+                isFirst = false;
+            } else {
+                new_ppr += "-" + ppr;
             }
         }
+
         return new_ppr;
     }
-    
+
     public class DecompressTask extends Task<List<DVBService>> {
 
         private File chemin;
@@ -265,7 +277,6 @@ public class Decompress_mw_s1 {
         @Override
         protected List<DVBService> call() throws Exception {
             List<DVBService> services;
-            int count = 0;
             int countOK = 0;
             int countKO = 0;
 
@@ -275,22 +286,18 @@ public class Decompress_mw_s1 {
 
             // Add to database
             bdd.truncate_bdd();
-            DVBService service2 = null;
-            for(DVBService service : services) try {
-                count++;
-                updateProgress(count, services.size());
-                service2 = service;
+            for (DVBService service : services) try {
+                updateProgress(countOK + countKO, services.size());
                 bdd.save_bdd(service);
                 countOK++;
             } catch(Exception e) {
             	e.printStackTrace();
-            	System.out.println(service2);
                 countKO++;
             }
 
-            System.out.println("count: " + count + " countOK: " + countOK + " countKO: " + countKO);
+            LOG.info("Services OK: " + countOK + " -- Services KO: " + countKO);
             return services;
-        };
+        }
     }
 
     public class DuplicateTask extends Task<List<DVBService>> {
@@ -308,7 +315,6 @@ public class Decompress_mw_s1 {
         @Override
         protected List<DVBService> call() throws Exception {
             List<DVBService> servicesUnique = new ArrayList<>();
-            int count = 0;
 
             updateProgress(-1, 0);
             List<String> uniqueId = new ArrayList<>();

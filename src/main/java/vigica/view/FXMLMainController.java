@@ -189,13 +189,12 @@ public class FXMLMainController implements Initializable {
                                         final String new_ppr;
                                         final DVBService service = (DVBService) cell.getTableRow().getItem();
 
-                                        if (new_val == true) {
+                                        if (new_val) {
                                             new_ppr = Decompress_mw_s1.add_ppr(cell.getText(), line);
-                                        }
-                                        else {
+                                        } else {
                                             new_ppr = Decompress_mw_s1.remove_ppr(cell.getText(), line);
                                         }
-                                        
+
                                         try {
                                             service.setPpr(new_ppr);
                                             service.setFlag(true);
@@ -363,8 +362,6 @@ public class FXMLMainController implements Initializable {
     @FXML
     private void handleFilterAction(ActionEvent event) {
 
-    	Integer idx = (s_idx.getText() == null || s_idx.getText().isEmpty() ? null : Integer.valueOf(s_idx.getText()));
-        // List<DVBService> services = serviceDB.read_bdd(idx, s_type.getText(), s_name.getText());
     	List<DVBService> services = serviceDB.read_bdd("%" + s_name.getText() + "%");
         serviceData.setAll(services);
     }
