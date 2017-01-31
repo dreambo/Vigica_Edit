@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import vigica.model.DVBService;
 
 @org.springframework.stereotype.Service
-public class Service_BDD implements IService {
+public class Service implements IService {
 
 	@Autowired
     private ServiceRepository repository; // = BeanFactory.getBean(ServiceRepository.class);

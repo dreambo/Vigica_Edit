@@ -27,11 +27,11 @@ import java.util.List;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import vigica.model.DVBService;
 import vigica.service.BeanFactory;
@@ -43,41 +43,48 @@ import vigica.view.Error_Msg;
  * 
  * @author nabillo
  */
-@Component
-public class Decompress_mw_s1 {
+public class Decompress_mw_s1 extends Service<List<DVBService>> {
 
 	private static final Logger LOG = Logger.getLogger(Decompress_mw_s1.class);
 
 	private final byte[] endpatt = {(byte) 0x00, (byte) 0x00, (byte) 0x3f, (byte) 0xff};
     static private Error_Msg error_msg = new Error_Msg();
+    private File dvbFile;
+
+    private static final Decompress_mw_s1 instance = getInstance();
+
     @Autowired
     private IService bdd = BeanFactory.getService();
-    public DecompressTask decompressTask;
-    public DuplicateTask duplicateTask;
-    
+    public DuplicateTask duplicateTask = new DuplicateTask();
+
     public List<DVBService> services = new ArrayList<>();
 
     public List<DVBService> getServices() {
         return services;
     }
     
-    public Decompress_mw_s1 () {
-        decompressTask = new DecompressTask();
-        duplicateTask = new DuplicateTask();
+    public static Decompress_mw_s1 getInstance() {
+		return (instance == null ? new Decompress_mw_s1() : instance);
+	}
+
+    public Decompress_mw_s1() {}
+
+    public void setDvbFile(File dvbFile) {
+        this.dvbFile = dvbFile;
     }
 
-    /**
+	/**
      *
-     * @param chemin
+     * @param file
      * @throws java.lang.Exception
      */
-    public void decompress(File chemin) throws Exception {
+    public void decompress(File file) throws Exception {
 
     	byte[] bindata;
         services.clear();
-        
+
         try {
-            Path binfile = Paths.get(chemin.getAbsolutePath());
+            Path binfile = Paths.get(file.getAbsolutePath());
             bindata = Files.readAllBytes(binfile);
             int binl = bindata.length;
             byte[] givl_s = Arrays.copyOfRange(bindata, 0, 4);
@@ -96,15 +103,6 @@ public class Decompress_mw_s1 {
                 // create record file name
                 byte rcdnamel = binrcd[1];
                 byte[] rcdname = Arrays.copyOfRange(binrcd, 5, Byte.toUnsignedInt(rcdnamel) + 5);
-//            for (int idx=0; idx < Byte.toUnsignedInt(rcdnamel); idx++) {
-//                if (rcdname[idx] < 0x21)  // non printable codes or spaces
-//                    rcdname[idx] = 0x5f;    // an underscore instead
-//                if (rcdname[idx] == 0x7f || rcdname[idx] == 0x3c || rcdname[idx] == 0x3a || rcdname[idx] == 0x22 || 
-//                    rcdname[idx] == 0x2f || rcdname[idx] == 0x5c || rcdname[idx] == 0x7c || rcdname[idx] == 0x3f ||
-//                    rcdname[idx] == 0x2a
-//                    )  // control chars < > : " / \ | ? * space are not allowed in file names; replace by %
-//                    rcdname[idx] = 0x25;
-//            }
 
                 // start the filename with R | TV | ? to indicate the radio/TV/unknown service type
                 String stype = "U"; // unknown
@@ -263,38 +261,6 @@ public class Decompress_mw_s1 {
         return new_ppr;
     }
 
-    public class DecompressTask extends Task<List<DVBService>> {
-
-        private File chemin;
-
-        public void setChemin(File chemin) {
-            this.chemin = chemin;
-        }
-
-        @Override
-        protected List<DVBService> call() throws Exception {
-
-            int countOK = 0;
-            int countKO = 0;
-
-            updateProgress(-1, 0);
-            decompress(chemin);
-
-            // Add to database
-            for (DVBService service : services) try {
-                updateProgress(countOK + countKO, services.size());
-                bdd.save_bdd(service);
-                countOK++;
-            } catch(Exception e) {
-            	e.printStackTrace();
-                countKO++;
-            }
-
-            LOG.info("Services OK: " + countOK + " -- Services KO: " + countKO);
-            return services;
-        }
-    }
-
     public class DuplicateTask extends Task<List<DVBService>> {
 
         ObservableList<DVBService> services = FXCollections.observableArrayList();
@@ -331,4 +297,31 @@ public class Decompress_mw_s1 {
             return servicesUnique;
         };
     }
+
+	@Override
+	protected Task<List<DVBService>> createTask() {
+		return new Task<List<DVBService>>() {
+			@Override
+			protected List<DVBService> call() throws Exception {
+	            int countOK = 0;
+	            int countKO = 0;
+
+	            updateProgress(-1, 0);
+	            decompress(dvbFile);
+
+	            // Add to database
+	            for (DVBService service : services) try {
+	                updateProgress(countOK + countKO, services.size());
+	                bdd.save_bdd(service);
+	                countOK++;
+	            } catch(Exception e) {
+	            	e.printStackTrace();
+	                countKO++;
+	            }
+
+	            LOG.info("Services OK: " + countOK + " -- Services KO: " + countKO);
+	            return services;
+			}
+		};
+	}
 }

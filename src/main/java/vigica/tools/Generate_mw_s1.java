@@ -22,10 +22,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import vigica.model.DVBService;
 import vigica.service.BeanFactory;
@@ -35,23 +35,28 @@ import vigica.service.IService;
  *
  * @author bnabi
  */
-@Component
-public class Generate_mw_s1 {
+public class Generate_mw_s1 extends Service<Void> {
+
+	private static final Generate_mw_s1 instance = getInstance();
 
 	@Autowired
     private IService bdd = BeanFactory.getService();
+	private File dvbFile;
+    private Generate_mw_s1 () {}
 
-	public GenerateTask generateTask;
+    public static Generate_mw_s1 getInstance() {
+		return (instance == null ? new Generate_mw_s1() : instance);
+	}
 
-    public Generate_mw_s1 () {
-        generateTask = new GenerateTask();
+    public void setDvbFile(File dvbFile) {
+    	this.dvbFile = dvbFile;
     }
-    
-    /**
+
+	/**
      *
      * @param chemin
      */
-    public void compress(List<DVBService> services, File chemin) throws Exception {
+    public void compress(List<DVBService> services) throws Exception {
         List<Byte> satservices = new ArrayList<>();
 
         for (DVBService service : services) {
@@ -108,7 +113,7 @@ public class Generate_mw_s1 {
         
         //CRC32 crc = new CRC32();
         CRC32_mpeg crc = new CRC32_mpeg();
-        bindata.stream().forEach((bin) -> {
+        bindata.forEach((bin) -> {
             crc.update(bin);
         });
         
@@ -120,7 +125,7 @@ public class Generate_mw_s1 {
         mw_s1.addAll(flbyte);
         mw_s1.addAll(crcbyte);
         mw_s1.addAll(bindata);
-        FileOutputStream servicesf = new FileOutputStream(chemin);
+        FileOutputStream servicesf = new FileOutputStream(dvbFile);
         for (byte car: mw_s1)
             servicesf.write(car);
         servicesf.close();
@@ -174,24 +179,17 @@ public class Generate_mw_s1 {
 
         return ppr;
     }
-    
-    public class GenerateTask extends Task<Void> {
 
-        private File chemin;
+	@Override
+	protected Task<Void> createTask() {
+		return new Task<Void>() {
+			@Override
+			protected Void call() throws Exception {
+	            updateProgress(-1, 0);
+	            compress(bdd.read_bdd());
 
-        public void setChemin(File chemin) {
-            this.chemin = chemin;
-        }
-
-        @Override
-        protected Void call() throws Exception {
-
-            updateProgress(-1, 0);
-            List<DVBService> services = bdd.read_bdd();
-
-            compress(services, chemin);
-
-            return null;
-        };
-    }
+	            return null;
+			}
+		};
+	}
 }

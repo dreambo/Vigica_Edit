@@ -20,9 +20,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
@@ -32,6 +29,9 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
 import vigica.model.DVBService;
 import vigica.service.BeanFactory;
 import vigica.service.IService;
@@ -41,14 +41,12 @@ import vigica.view.FXMLCompareController;
  *
  * @author bnabi
  */
-@Component
 public class Compare_mw_s1 {
 
 	public List<DVBService> servicesLost = new ArrayList<>();
     public CompareTask compareTask;
 
-    @Autowired
-    private Decompress_mw_s1 decompress = new Decompress_mw_s1();
+    private Decompress_mw_s1 decompress = Decompress_mw_s1.getInstance();
     @Autowired
     private IService bdd = BeanFactory.getService();
 
