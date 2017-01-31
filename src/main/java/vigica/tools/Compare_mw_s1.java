@@ -31,59 +31,60 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import vigica.model.DVBService;
-import vigica.service.BeanFactory;
-import vigica.service.IService;
+import vigica.service.IDBService;
 import vigica.view.FXMLCompareController;
 
 /**
  *
  * @author bnabi
  */
+@Component
 public class Compare_mw_s1 {
 
 	public List<DVBService> servicesLost = new ArrayList<>();
     public CompareTask compareTask;
 
-    private Decompress_mw_s1 decompress = Decompress_mw_s1.getInstance();
     @Autowired
-    private IService bdd = BeanFactory.getService();
+    private Decompress_mw_s1 decompress;
+    @Autowired
+    private IDBService bdd;
 
     private List<DVBService> getLostServices() {
         return servicesLost;
     }
     
-    public Compare_mw_s1 () {
+    public Compare_mw_s1() {
         compareTask = new CompareTask();
     }
     
     private void detectNew(List<DVBService> services, List<DVBService> servicesOld) throws Exception {
-        Boolean isNew;
-        
-        try {
-            for (DVBService service : services) {
-                isNew = true;
-                String line;
-                String lineOld;
 
-                for (DVBService serviceOld : servicesOld) {
-                    line = service.getName();
-                    lineOld = serviceOld.getName();
+    	Boolean isNew;
+        String name;
+        String oldName;
 
-                    if (line.equalsIgnoreCase(lineOld)) {
-                        isNew = false;
-                        break;
-                    }
+        for (DVBService service : services) {
+            isNew = true;
+
+            for (DVBService serviceOld : servicesOld) {
+            	name = service.getName();
+            	oldName = serviceOld.getName();
+
+                if (name.equals(oldName)) {
+                    isNew = false;
+                    break;
                 }
-                if (isNew)
-                    service.setNeew("N");
             }
-        }catch (Exception e) {
-            throw new Exception(e.getCause().getMessage());
+
+            if (isNew) {
+                service.setNeew("N");
+            }
         }
     }
-    
+
     private void integratePPR(List<DVBService> services, List<DVBService> servicesOld) throws Exception {
         Boolean isFind;
         servicesLost.clear();

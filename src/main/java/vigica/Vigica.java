@@ -17,7 +17,6 @@
 package vigica;
 
 import java.io.IOException;
-import java.net.URL;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -28,6 +27,7 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
+import org.apache.log4j.Logger;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -42,10 +42,11 @@ import org.springframework.context.annotation.Lazy;
 @SpringBootApplication
 public class Vigica extends Application {
 
+	private static final Logger LOG = Logger.getLogger(Vigica.class);
+
 	private static String[] args;
 
     private Stage primaryStage;
-    private AnchorPane rootLayout;
 	private ConfigurableApplicationContext applicationContext;
 
 	@Override
@@ -70,9 +71,7 @@ public class Vigica extends Application {
         this.primaryStage.setTitle("Vigica Edit");
         this.primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/app_icon.png")));
 
-        initRootLayout();
-
-        showServiceOverview();
+        showServiceOverview(initRootLayout());
         
         this.primaryStage.setOnCloseRequest(e -> Platform.exit());
     }
@@ -80,13 +79,13 @@ public class Vigica extends Application {
     /**
      * Initializes the root layout.
      */
-    public void initRootLayout() {
-        try {
+    public AnchorPane initRootLayout() {
+
+    	AnchorPane rootLayout = null;
+
+    	try {
             // Load root layout from fxml file.
-            FXMLLoader loader = new FXMLLoader();
-            URL fxml = getClass().getResource("/vigica/view/RootLayout.fxml");
-            loader.setLocation(fxml);
-            rootLayout = (AnchorPane) loader.load();
+        	rootLayout = (AnchorPane) load("/vigica/view/RootLayout.fxml");
 
             // Show the scene containing the root layout.
             Scene scene = new Scene(rootLayout);
@@ -94,26 +93,25 @@ public class Vigica extends Application {
             primaryStage.setResizable(false);
             primaryStage.show();
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
+
+        return rootLayout;
     }
 
     /**
      * Shows the service overview inside the root layout.
      */
-    public void showServiceOverview() {
+    public void showServiceOverview(AnchorPane rootLayout) {
         try {
-            // Load person overview.
-            FXMLLoader loader = new FXMLLoader();
-            URL fxml = getClass().getResource("/vigica/view/FXMLMain.fxml");
-            loader.setLocation(fxml);
-            AnchorPane serviceOverview = (AnchorPane) loader.load();
+            // Load main view.
+            AnchorPane serviceOverview = (AnchorPane) load("/vigica/view/FXMLMain.fxml");
 
             // Set service overview into the center of root layout.
             rootLayout.getChildren().add(serviceOverview);
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -124,5 +122,19 @@ public class Vigica extends Application {
     public static void main(String[] args) {
 
     	launch(Vigica.class, Vigica.args = args);
+    }
+
+    public Object load(String url) {
+        FXMLLoader loader = new FXMLLoader();
+        loader.setControllerFactory(clazz -> applicationContext.getBean(clazz));
+        loader.setLocation(getClass().getResource(url));
+
+        try {
+            return loader.load();
+        } catch (IOException e) {
+            LOG.error("Some bad things!", e);
+        }
+
+        return null;
     }
 }

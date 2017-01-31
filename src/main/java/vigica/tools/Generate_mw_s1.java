@@ -26,27 +26,23 @@ import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import vigica.model.DVBService;
-import vigica.service.BeanFactory;
-import vigica.service.IService;
+import vigica.service.IDBService;
 
 /**
  *
  * @author bnabi
  */
+@Component
 public class Generate_mw_s1 extends Service<Void> {
 
-	private static final Generate_mw_s1 instance = getInstance();
-
 	@Autowired
-    private IService bdd = BeanFactory.getService();
+    private IDBService bdd;
 	private File dvbFile;
-    private Generate_mw_s1 () {}
 
-    public static Generate_mw_s1 getInstance() {
-		return (instance == null ? new Generate_mw_s1() : instance);
-	}
+	public Generate_mw_s1() {}
 
     public void setDvbFile(File dvbFile) {
     	this.dvbFile = dvbFile;
@@ -60,9 +56,10 @@ public class Generate_mw_s1 extends Service<Void> {
         List<Byte> satservices = new ArrayList<>();
 
         for (DVBService service : services) {
-            if (service.getFlag() == false) {
+            if (!service.getFlag()) {
                 List<Byte> sdata = hexStringToBytes(service.getLine());
                 satservices.addAll(sdata);
+
             } else {
             	List<Byte> sdata = hexStringToBytes(service.getLine());
                 int rcdlen = sdata.size();
@@ -81,14 +78,14 @@ public class Generate_mw_s1 extends Service<Void> {
                 int rcdnamel = Integer.valueOf(sdata.get(1));
                 List<Byte> filler = sdata.subList(2, 2 + 3);
                 List<Byte> payload = sdata.subList(rcdnamel + 5, sdata.size());
-                
+
                 List<Byte> newrec = new ArrayList<>();
                 newrec.add((byte) 0x01);
                 newrec.add((byte) newl);
                 newrec.addAll(filler);
-                
+
                 newrec.addAll(newn);
-                
+
                 newrec.addAll(payload);
 
                 satservices.addAll(newrec);

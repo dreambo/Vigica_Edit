@@ -21,16 +21,11 @@ import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import org.hibernate.HibernateException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Worker.State;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -53,9 +48,13 @@ import javafx.scene.input.KeyEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+
+import org.hibernate.HibernateException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import vigica.model.DVBService;
-import vigica.service.BeanFactory;
-import vigica.service.IService;
+import vigica.service.IDBService;
 import vigica.tools.Compare_mw_s1;
 import vigica.tools.Decompress_mw_s1;
 import vigica.tools.Generate_mw_s1;
@@ -71,10 +70,14 @@ public class FXMLMainController implements Initializable {
     final FileChooser fileChooser = new FileChooser();
     static private String[] perf = {"GENERAL", "INFO", "DOCUMENTARY", "MOVIES", "TV SHOW", "ZIC", "SPORT", "KIDS", "DIN", "MISC"}; 
 
-    Compare_mw_s1 compare = new Compare_mw_s1();
+    @Autowired
+    Compare_mw_s1 compare;
+    @Autowired
     Decompress_mw_s1 decompress;
     @Autowired
-    IService serviceDB = BeanFactory.getService();
+    IDBService serviceDB;
+    @Autowired
+    Generate_mw_s1 generate;
 
     /**
     * The data as an observable list of Service.
@@ -259,7 +262,7 @@ public class FXMLMainController implements Initializable {
         if (file != null) {
 
             currentDir = file.getParentFile();
-            decompress = Decompress_mw_s1.getInstance();
+            // decompress = Decompress_mw_s1.getInstance();
             decompress.setDvbFile(file);
             decompress.reset();
 
@@ -274,6 +277,7 @@ public class FXMLMainController implements Initializable {
                     serviceTable.setItems(serviceData);
                     title.setText(file.getName());
                     s_name.setDisable(false);
+                    s_name.clear();
                     saveButton.setDisable(false);
                     compareButton.setDisable(false);
                     duplicateButton.setDisable(false);
@@ -285,9 +289,6 @@ public class FXMLMainController implements Initializable {
                     error_msg.Error_diag("Error save BDD\n" + decompress.getException().getMessage());
                 }
             });
-
-            State state = decompress.getState();
-            System.out.println(state);
 
             decompress.start();
         }
@@ -345,7 +346,7 @@ public class FXMLMainController implements Initializable {
         if (file != null) {
             currentDir = file.getParentFile();
 
-            Generate_mw_s1 generate = Generate_mw_s1.getInstance();
+            // Generate_mw_s1 generate = Generate_mw_s1.getInstance();
             generate.setDvbFile(file);
             generate.reset();
 

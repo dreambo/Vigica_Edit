@@ -3,14 +3,15 @@ package vigica.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import vigica.model.DVBService;
 
-@org.springframework.stereotype.Service
-public class Service implements IService {
+@Service
+public class DBService implements IDBService {
 
 	@Autowired
-    private ServiceRepository repository; // = BeanFactory.getBean(ServiceRepository.class);
+    private DBRepository repository; // = BeanFactory.getBean(ServiceRepository.class);
 
     @Override
 	public List<DVBService> read_bdd() {
@@ -47,4 +48,13 @@ public class Service implements IService {
 
     	repository.delete(service);
     }
+
+/*
+	@Bean
+	public ServletRegistrationBean h2servletRegistration() {
+	    ServletRegistrationBean registration = new ServletRegistrationBean(new WebServlet());
+	    registration.addUrlMappings("/console/*");
+	    return registration;
+	}
+*/
 }

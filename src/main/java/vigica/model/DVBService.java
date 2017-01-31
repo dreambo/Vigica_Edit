@@ -26,7 +26,6 @@ import javafx.beans.property.StringProperty;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.Table;
 
 /**
  * Model class for
@@ -34,7 +33,6 @@ import javax.persistence.Table;
  * @author nabillo
  */
 @Entity
-@Table(name="SERVICE")
 public class DVBService {
 
     private final IntegerProperty idx;
@@ -46,9 +44,6 @@ public class DVBService {
     private final BooleanProperty flag;
     private final StringProperty neew;
     
-    /**
-    * Default constructor.
-    */
     public DVBService() {
         this.type = new SimpleStringProperty("");
         this.idx = new SimpleIntegerProperty(0);
@@ -161,5 +156,22 @@ public class DVBService {
 
     public StringProperty neewProperty() {
         return neew;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+
+    	if (obj == null || !(obj instanceof DVBService)) {
+    		return false;
+    	}
+
+    	DVBService dvbService = (DVBService) obj;
+
+    	return (getName() != null && getName().equals(dvbService.getName()));
+    }
+
+    @Override
+    public int hashCode() {
+    	return (getName() == null ? 0 : getName().hashCode());
     }
 }

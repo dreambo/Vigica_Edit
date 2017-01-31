@@ -32,10 +32,10 @@ import javafx.concurrent.Task;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import vigica.model.DVBService;
-import vigica.service.BeanFactory;
-import vigica.service.IService;
+import vigica.service.IDBService;
 import vigica.view.Error_Msg;
 
 /**
@@ -43,6 +43,7 @@ import vigica.view.Error_Msg;
  * 
  * @author nabillo
  */
+@Component
 public class Decompress_mw_s1 extends Service<List<DVBService>> {
 
 	private static final Logger LOG = Logger.getLogger(Decompress_mw_s1.class);
@@ -51,21 +52,15 @@ public class Decompress_mw_s1 extends Service<List<DVBService>> {
     static private Error_Msg error_msg = new Error_Msg();
     private File dvbFile;
 
-    private static final Decompress_mw_s1 instance = getInstance();
-
     @Autowired
-    private IService bdd = BeanFactory.getService();
+    private IDBService bdd; // = BeanFactory.getService();
     public DuplicateTask duplicateTask = new DuplicateTask();
 
-    public List<DVBService> services = new ArrayList<>();
+    private List<DVBService> services = new ArrayList<>();
 
     public List<DVBService> getServices() {
         return services;
     }
-    
-    public static Decompress_mw_s1 getInstance() {
-		return (instance == null ? new Decompress_mw_s1() : instance);
-	}
 
     public Decompress_mw_s1() {}
 
@@ -245,7 +240,7 @@ public class Decompress_mw_s1 extends Service<List<DVBService>> {
         String new_ppr = "";
         Boolean isFirst = true;
         
-        for (String ppr: old_ppr.split("-")){
+        for (String ppr: old_ppr.split("-")) {
             if (Integer.valueOf(ppr) == new_Value) {
                 continue;
             }
@@ -279,14 +274,13 @@ public class Decompress_mw_s1 extends Service<List<DVBService>> {
 
             updateProgress(-1, 0);
             List<String> uniqueIds = new ArrayList<>();
-            
-            int i=1;
+
+            int i = 0;
 
             for (DVBService service: services) {
                 if (!uniqueIds.contains(service.getName()) || !service.getPpr().equals("")) {
-                    service.setIdx(i);
+                    service.setIdx(++i);
                     servicesUnique.add(service);
-                    i++;
                     uniqueIds.add(service.getName());
                 }
             }
@@ -295,7 +289,7 @@ public class Decompress_mw_s1 extends Service<List<DVBService>> {
             bdd.save_bdd(servicesUnique);
 
             return servicesUnique;
-        };
+        }
     }
 
 	@Override
@@ -315,7 +309,7 @@ public class Decompress_mw_s1 extends Service<List<DVBService>> {
 	                bdd.save_bdd(service);
 	                countOK++;
 	            } catch(Exception e) {
-	            	e.printStackTrace();
+	            	LOG.error("Error while saving services", e);
 	                countKO++;
 	            }
 
