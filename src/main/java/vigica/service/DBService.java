@@ -1,5 +1,6 @@
 package vigica.service;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,7 @@ public class DBService implements IDBService {
     }
     
     @Override
-	public void save_bdd (List<DVBService> services)  {
+	public void save_bdd (Collection<DVBService> services)  {
 
     	repository.save(services);
     }

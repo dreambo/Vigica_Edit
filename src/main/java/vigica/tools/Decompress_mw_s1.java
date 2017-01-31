@@ -23,7 +23,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -53,7 +55,7 @@ public class Decompress_mw_s1 extends Service<List<DVBService>> {
     private File dvbFile;
 
     @Autowired
-    private IDBService bdd; // = BeanFactory.getService();
+    private IDBService bdd;
     public DuplicateTask duplicateTask = new DuplicateTask();
 
     private List<DVBService> services = new ArrayList<>();
@@ -256,13 +258,31 @@ public class Decompress_mw_s1 extends Service<List<DVBService>> {
         return new_ppr;
     }
 
-    public class DuplicateTask extends Task<List<DVBService>> {
+    public class DuplicateTask2 extends Task<Set<DVBService>> {
 
         ObservableList<DVBService> services = FXCollections.observableArrayList();
 
-        public ObservableList<DVBService> getServices() {
-            return this.services;
+        public void setServices(ObservableList<DVBService> services) {
+            this.services = services;
         }
+
+        @Override
+        protected Set<DVBService> call() throws Exception {
+        	Set<DVBService> servicesUnique = new HashSet<>();
+        	servicesUnique.addAll(services);
+
+            updateProgress(-1, 0);
+
+            // Add to database
+            bdd.save_bdd(servicesUnique);
+
+            return servicesUnique;
+        }
+    }
+
+    public class DuplicateTask extends Task<List<DVBService>> {
+
+        ObservableList<DVBService> services = FXCollections.observableArrayList();
 
         public void setServices(ObservableList<DVBService> services) {
             this.services = services;
@@ -278,7 +298,7 @@ public class Decompress_mw_s1 extends Service<List<DVBService>> {
             int i = 0;
 
             for (DVBService service: services) {
-                if (!uniqueIds.contains(service.getName()) || !service.getPpr().equals("")) {
+                if (!uniqueIds.contains(service.getName()) || !service.getPpr().isEmpty()) {
                     service.setIdx(++i);
                     servicesUnique.add(service);
                     uniqueIds.add(service.getName());

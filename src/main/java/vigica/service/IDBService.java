@@ -1,5 +1,6 @@
 package vigica.service;
 
+import java.util.Collection;
 import java.util.List;
 
 import vigica.model.DVBService;
@@ -12,7 +13,7 @@ public interface IDBService {
 
 	public abstract void save_bdd(DVBService service);
 
-	public abstract void save_bdd(List<DVBService> services);
+	public abstract void save_bdd(Collection<DVBService> services);
 
 	public abstract void update_bdd(DVBService service);
 
