@@ -55,9 +55,10 @@ import org.springframework.stereotype.Component;
 
 import vigica.model.DVBService;
 import vigica.service.IDBService;
+import vigica.tools.ByteUtils;
 import vigica.tools.Compare_mw_s1;
-import vigica.tools.Decompress_mw_s1;
-import vigica.tools.Generate_mw_s1;
+import vigica.tools.DVBCompressor;
+import vigica.tools.DVBDecompressor;
 
 /**
  *
@@ -73,11 +74,11 @@ public class FXMLMainController implements Initializable {
     @Autowired
     Compare_mw_s1 compare;
     @Autowired
-    Decompress_mw_s1 decompress;
+    DVBDecompressor decompressor;
     @Autowired
     IDBService serviceDB;
     @Autowired
-    Generate_mw_s1 generate;
+    DVBCompressor generate;
 
     /**
     * The data as an observable list of Service.
@@ -182,7 +183,7 @@ public class FXMLMainController implements Initializable {
                                 final int line = i;
 
                                 prefMenuItem.setId(String.valueOf(i));
-                                if (Decompress_mw_s1.isPreferenceOn(cell.getText(), i)) {
+                                if (ByteUtils.isPreferenceOn(cell.getText(), i)) {
                                     prefMenuItem.setSelected(true);
                                 }
 
@@ -193,9 +194,9 @@ public class FXMLMainController implements Initializable {
                                         final DVBService service = (DVBService) cell.getTableRow().getItem();
 
                                         if (new_val) {
-                                            new_ppr = Decompress_mw_s1.add_ppr(cell.getText(), line);
+                                            new_ppr = ByteUtils.add_ppr(cell.getText(), line);
                                         } else {
-                                            new_ppr = Decompress_mw_s1.remove_ppr(cell.getText(), line);
+                                            new_ppr = ByteUtils.remove_ppr(cell.getText(), line);
                                         }
 
                                         try {
@@ -262,18 +263,17 @@ public class FXMLMainController implements Initializable {
         if (file != null) {
 
             currentDir = file.getParentFile();
-            // decompress = Decompress_mw_s1.getInstance();
-            decompress.setDvbFile(file);
-            decompress.reset();
+            decompressor.setDvbFile(file);
+            decompressor.reset();
 
-            pi.visibleProperty().bind(decompress.runningProperty());
-            pi.progressProperty().bind(decompress.progressProperty());
+            pi.visibleProperty().bind(decompressor.runningProperty());
+            pi.progressProperty().bind(decompressor.progressProperty());
 
-            decompress.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+            decompressor.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
                 @Override
                 public void handle(WorkerStateEvent t) {
                     // print services into tableview
-                    serviceData.setAll(decompress.getValue());
+                    serviceData.setAll(decompressor.getValue());
                     serviceTable.setItems(serviceData);
                     title.setText(file.getName());
                     s_name.setDisable(false);
@@ -283,14 +283,15 @@ public class FXMLMainController implements Initializable {
                     duplicateButton.setDisable(false);
                 }
             });
-            decompress.setOnFailed(new EventHandler<WorkerStateEvent>() {
+
+            decompressor.setOnFailed(new EventHandler<WorkerStateEvent>() {
                 @Override
                 public void handle(WorkerStateEvent t) {
-                    error_msg.Error_diag("Error save BDD\n" + decompress.getException().getMessage());
+                    error_msg.Error_diag("Error save BDD\n" + decompressor.getException().getMessage());
                 }
             });
 
-            decompress.start();
+            decompressor.start();
         }
     }
 
@@ -309,28 +310,29 @@ public class FXMLMainController implements Initializable {
         if (file != null) {
             currentDir = file.getParentFile();
 
-            pi.visibleProperty().bind(compare.compareTask.runningProperty());
-            pi.progressProperty().bind(compare.compareTask.progressProperty());
-            compare.compareTask.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+            pi.visibleProperty().bind(compare.runningProperty());
+            pi.progressProperty().bind(compare.progressProperty());
+            compare.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
                 @Override
                 public void handle(WorkerStateEvent t) {
                     // print services into tableview
-                    serviceData.setAll(compare.compareTask.getValue());
+                    serviceData.setAll(compare.getValue());
                 }
             });
-            compare.compareTask.setOnFailed(new EventHandler<WorkerStateEvent>() {
+            compare.setOnFailed(new EventHandler<WorkerStateEvent>() {
                 @Override
                 public void handle(WorkerStateEvent t) {
-                    error_msg.Error_diag("Error compare services\n" + compare.compareTask.getException().getMessage());
+                    error_msg.Error_diag("Error compare services\n" + compare.getException().getMessage());
                 }
             });
             
 
-            compare.compareTask.setChemin(file);
-            new Thread(compare.compareTask).start();
+            compare.setDvbFile(file);
+            compare.reset();
+            compare.start();
         }
     }
-    
+
     @FXML
     private void saveAction(ActionEvent event) {
 
@@ -346,7 +348,6 @@ public class FXMLMainController implements Initializable {
         if (file != null) {
             currentDir = file.getParentFile();
 
-            // Generate_mw_s1 generate = Generate_mw_s1.getInstance();
             generate.setDvbFile(file);
             generate.reset();
 
@@ -355,7 +356,7 @@ public class FXMLMainController implements Initializable {
             generate.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
                 @Override
                 public void handle(WorkerStateEvent t) {
-                    error_msg.Info_diag("Services exported");
+                    error_msg.Info_diag("Services saved");
                 }
             });
             generate.setOnFailed(new EventHandler<WorkerStateEvent>() {
@@ -366,9 +367,6 @@ public class FXMLMainController implements Initializable {
             });
 
             generate.start();
-
-        } else {
-            // error_msg.Error_diag("No file choosed\n");
         }
     }
 
@@ -381,26 +379,27 @@ public class FXMLMainController implements Initializable {
 
     @FXML
     private void handleDuplicateAction(ActionEvent event) {
-
-        pi.visibleProperty().bind(decompress.duplicateTask.runningProperty());
-        pi.progressProperty().bind(decompress.duplicateTask.progressProperty());
-        decompress.duplicateTask.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+/*
+        pi.visibleProperty().bind(decompressor.duplicateTask.runningProperty());
+        pi.progressProperty().bind(decompressor.duplicateTask.progressProperty());
+        decompressor.duplicateTask.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
             @Override
             public void handle(WorkerStateEvent t) {
                 // print services into tableview
-                serviceData.setAll(decompress.duplicateTask.getValue());
+                serviceData.setAll(decompressor.duplicateTask.getValue());
             }
         });
-        decompress.duplicateTask.setOnFailed(new EventHandler<WorkerStateEvent>() {
+        decompressor.duplicateTask.setOnFailed(new EventHandler<WorkerStateEvent>() {
             @Override
             public void handle(WorkerStateEvent t) {
-                error_msg.Error_diag("Error remove duplicate services\n" + decompress.duplicateTask.getException().getMessage());
+                error_msg.Error_diag("Error remove duplicate services\n" + decompressor.duplicateTask.getException().getMessage());
             }
         });
 
 
-        decompress.duplicateTask.setServices(serviceData);
-        new Thread(decompress.duplicateTask).start();
+        decompressor.duplicateTask.setServices(serviceData);
+        new Thread(decompressor.duplicateTask).start();
+*/
     }
     
     class EditingCell extends TableCell<DVBService, String> {

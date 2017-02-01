@@ -174,4 +174,9 @@ public class DVBService {
     public int hashCode() {
     	return (getName() == null ? 0 : getName().hashCode());
     }
+
+    @Override
+    public String toString() {
+    	return getName() + "[" + getNid() + "]";
+    }
 }

@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javafx.application.Platform;
+import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -42,24 +43,26 @@ import vigica.view.FXMLCompareController;
  * @author bnabi
  */
 @Component
-public class Compare_mw_s1 {
+public class Compare_mw_s1 extends Service<List<DVBService>> {
 
 	public List<DVBService> servicesLost = new ArrayList<>();
-    public CompareTask compareTask;
+    private File dvbFile;
 
     @Autowired
-    private Decompress_mw_s1 decompress;
+    private DVBDecompressor decompress;
     @Autowired
     private IDBService bdd;
 
     private List<DVBService> getLostServices() {
         return servicesLost;
     }
-    
-    public Compare_mw_s1() {
-        compareTask = new CompareTask();
+
+    public Compare_mw_s1() {}
+
+    public void setDvbFile(File dvbFile) {
+    	this.dvbFile = dvbFile;
     }
-    
+
     private void detectNew(List<DVBService> services, List<DVBService> servicesOld) throws Exception {
 
     	Boolean isNew;
@@ -86,41 +89,38 @@ public class Compare_mw_s1 {
     }
 
     private void integratePPR(List<DVBService> services, List<DVBService> servicesOld) throws Exception {
-        Boolean isFind;
+
+    	Boolean isFind;
         servicesLost.clear();
-        
-        try {
-            for (DVBService serviceOld : servicesOld) {
-                isFind = false;
-                String line;
-                String lineOld;
 
-                if (serviceOld.getPpr().length() != 0) {
-                    for (DVBService service : services) {
-                        line = service.getName();
-                        lineOld = serviceOld.getName();
+        for (DVBService serviceOld : servicesOld) {
+            isFind = false;
+            String line;
+            String lineOld;
 
-                        if (line.equalsIgnoreCase(lineOld)) {
-                            service.setPpr(serviceOld.getPpr());
-                            service.setFlag(true);
-                            isFind = true;
-                            break;
-                        }
+            if (serviceOld.getPpr().length() != 0) {
+                for (DVBService service : services) {
+                    line = service.getName();
+                    lineOld = serviceOld.getName();
+
+                    if (line.equalsIgnoreCase(lineOld)) {
+                        service.setPpr(serviceOld.getPpr());
+                        service.setFlag(true);
+                        isFind = true;
+                        break;
                     }
                 }
-                else
-                    isFind = true;
-
-                if (!isFind) {
-                    servicesLost.add(new DVBService(serviceOld.getType(), serviceOld.getIdx(), serviceOld.getName(), serviceOld.getNid(), serviceOld.getPpr(), serviceOld.getLine(), serviceOld.getFlag(), serviceOld.getNeew()));
-                }
+            } else {
+                isFind = true;
             }
-        }catch (Exception e) {
-            throw new Exception(e.getCause().getMessage());
+
+            if (!isFind) {
+                servicesLost.add(new DVBService(serviceOld.getType(), serviceOld.getIdx(), serviceOld.getName(), serviceOld.getNid(), serviceOld.getPpr(), serviceOld.getLine(), serviceOld.getFlag(), serviceOld.getNeew()));
+            }
         }
     }
-    
-    private void showOldPPR(Stage primaryStage, List<DVBService> services) {
+
+    private void showOldPPR(List<DVBService> services) {
         try {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getResource("/vigica/view/FXMLCompare.fxml"));
@@ -131,7 +131,6 @@ public class Compare_mw_s1 {
 
             Stage modal_dialog = new Stage(StageStyle.DECORATED);
             modal_dialog.initModality(Modality.NONE);
-            modal_dialog.initOwner(primaryStage);
             modal_dialog.setTitle("Lost Preferences");
             modal_dialog.getIcons().add(new Image(getClass().getResourceAsStream("/app_icon.png")));
 
@@ -143,54 +142,39 @@ public class Compare_mw_s1 {
             e.printStackTrace();
         }
     }
-    
-    public class CompareTask extends Task<List<DVBService>> {
 
-        private File chemin;
-        Stage stage;
-        
-        public File getChemin() {
-            return this.chemin;
-        }
+	@Override
+	protected Task<List<DVBService>> createTask() {
 
-        public void setChemin(File chemin) {
-            this.chemin = chemin;
-        }
-        
-        public String getStage() {
-            return this.chemin.getAbsolutePath();
-        }
+		return new Task<List<DVBService>>() {
 
-        public void setStage(Stage stage) {
-            this.stage = stage;
-        }
+			@Override
+			protected List<DVBService> call() throws Exception {
+	            List<DVBService> services;
+	            List<DVBService> servicesOld;
+	            List<DVBService> servicesNew;
+	            int count = 0;
 
-        @Override
-        protected List<DVBService> call() throws Exception {
-            List<DVBService> services;
-            List<DVBService> servicesOld;
-            List<DVBService> servicesNew;
-            int count = 0;
+	            updateProgress(-1, 0);
+	            decompress.setDvbFile(dvbFile);
+	            servicesOld = decompress.decompress();
 
-            updateProgress(-1, 0);
-            decompress.decompress(chemin);
-            servicesOld = decompress.getServices();
+	            services = bdd.read_bdd();
 
-            services = bdd.read_bdd();
+	            detectNew(services, servicesOld);
+	            integratePPR(services, servicesOld);
+	            servicesNew = getLostServices();
 
-            detectNew(services, servicesOld);
-            integratePPR(services, servicesOld);
-            servicesNew = getLostServices();
+	            for(DVBService service : services){
+	                count++;
+	                updateProgress(count, services.size());
+	                bdd.save_bdd(service);
+	            }
 
-            for(DVBService service : services){
-                count++;
-                updateProgress(count, services.size());
-                bdd.save_bdd(service);
-            }
+	            Platform.runLater(() -> showOldPPR(servicesNew));
 
-            Platform.runLater(() -> showOldPPR(stage, servicesNew));
-
-            return services;
-        };
-    }
+	            return services;
+			}
+		};
+	}
 }
