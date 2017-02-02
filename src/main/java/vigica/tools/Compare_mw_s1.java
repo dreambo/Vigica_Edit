@@ -23,7 +23,6 @@ import java.util.List;
 import javafx.application.Platform;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
@@ -34,6 +33,7 @@ import javafx.stage.StageStyle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import vigica.Vigica;
 import vigica.model.DVBService;
 import vigica.service.IDBService;
 import vigica.view.FXMLCompareController;
@@ -52,6 +52,8 @@ public class Compare_mw_s1 extends Service<List<DVBService>> {
     private DVBDecompressor decompress;
     @Autowired
     private IDBService bdd;
+    @Autowired
+    private FXMLCompareController compareController;
 
     private List<DVBService> getLostServices() {
         return servicesLost;
@@ -121,26 +123,18 @@ public class Compare_mw_s1 extends Service<List<DVBService>> {
     }
 
     private void showOldPPR(List<DVBService> services) {
-        try {
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(getClass().getResource("/vigica/view/FXMLCompare.fxml"));
-            AnchorPane rootLayout = (AnchorPane) loader.load();
 
-            FXMLCompareController t1 = (FXMLCompareController)loader.getController();
-            t1.setServices(services);
+        Stage modal_dialog = new Stage(StageStyle.DECORATED);
+        modal_dialog.initModality(Modality.NONE);
+        modal_dialog.setTitle("Lost Preferences");
+        modal_dialog.getIcons().add(new Image(getClass().getResourceAsStream("/app_icon.png")));
 
-            Stage modal_dialog = new Stage(StageStyle.DECORATED);
-            modal_dialog.initModality(Modality.NONE);
-            modal_dialog.setTitle("Lost Preferences");
-            modal_dialog.getIcons().add(new Image(getClass().getResourceAsStream("/app_icon.png")));
-
-            // Show the scene containing the root layout.
-            Scene scene = new Scene(rootLayout);
-            modal_dialog.setScene(scene);
-            modal_dialog.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        // Show the scene containing the root layout.
+        AnchorPane rootLayout = (AnchorPane) Vigica.load("/vigica/view/FXMLCompare.fxml");
+        compareController.setServices(services);
+        Scene scene = new Scene(rootLayout);
+        modal_dialog.setScene(scene);
+        modal_dialog.show();
     }
 
 	@Override

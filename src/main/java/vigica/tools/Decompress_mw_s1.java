@@ -23,12 +23,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 
 import org.apache.log4j.Logger;
@@ -37,7 +33,7 @@ import org.springframework.stereotype.Component;
 
 import vigica.model.DVBService;
 import vigica.service.IDBService;
-import vigica.view.Error_Msg;
+import vigica.view.Message;
 
 /**
  * Util class for file decomposition
@@ -49,12 +45,11 @@ public class Decompress_mw_s1 extends DVBDecompressor {
 
 	private static final Logger LOG = Logger.getLogger(Decompress_mw_s1.class);
 
-    static private Error_Msg error_msg = new Error_Msg();
+    static private Message error_msg = new Message();
     private File dvbFile;
 
     @Autowired
     private IDBService bdd;
-    public DuplicateTask duplicateTask = new DuplicateTask();
 
     public Decompress_mw_s1() {}
 
@@ -76,7 +71,7 @@ public class Decompress_mw_s1 extends DVBDecompressor {
         int givl_d = ByteBuffer.wrap(givl_s).getInt() + 4;
 
         if (binl != givl_d) {
-            error_msg.Error_diag("length of input binary file \\n differs from length given in that file!");
+            error_msg.errorMessage("length of input binary file \\n differs from length given in that file!");
             return services;
         }
 
@@ -155,66 +150,15 @@ public class Decompress_mw_s1 extends DVBDecompressor {
         return ppr_s;
     }
 
-    public class DuplicateTask2 extends Task<Set<DVBService>> {
-
-        ObservableList<DVBService> services = FXCollections.observableArrayList();
-
-        public void setServices(ObservableList<DVBService> services) {
-            this.services = services;
-        }
-
-        @Override
-        protected Set<DVBService> call() throws Exception {
-        	Set<DVBService> servicesUnique = new HashSet<>();
-        	servicesUnique.addAll(services);
-
-            updateProgress(-1, 0);
-
-            // Add to database
-            bdd.save_bdd(servicesUnique);
-
-            return servicesUnique;
-        }
-    }
-
-    public class DuplicateTask extends Task<List<DVBService>> {
-
-        ObservableList<DVBService> services = FXCollections.observableArrayList();
-
-        public void setServices(ObservableList<DVBService> services) {
-            this.services = services;
-        }
-
-        @Override
-        protected List<DVBService> call() throws Exception {
-            List<DVBService> servicesUnique = new ArrayList<>();
-
-            updateProgress(-1, 0);
-            List<String> uniqueIds = new ArrayList<>();
-
-            int i = 0;
-
-            for (DVBService service: services) {
-                if (!uniqueIds.contains(service.getName()) || !service.getPpr().isEmpty()) {
-                    service.setIdx(++i);
-                    servicesUnique.add(service);
-                    uniqueIds.add(service.getName());
-                }
-            }
-
-            // Add to database
-            bdd.save_bdd(servicesUnique);
-
-            return servicesUnique;
-        }
-    }
-
 	@Override
 	protected Task<List<DVBService>> createTask() {
+		
 		return new Task<List<DVBService>>() {
+
 			@Override
 			protected List<DVBService> call() throws Exception {
-	            int countOK = 0;
+
+				int countOK = 0;
 	            int countKO = 0;
 
 	            updateProgress(-1, 0);

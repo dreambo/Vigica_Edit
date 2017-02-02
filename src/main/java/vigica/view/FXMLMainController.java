@@ -26,6 +26,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Service;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -59,6 +60,7 @@ import vigica.tools.ByteUtils;
 import vigica.tools.Compare_mw_s1;
 import vigica.tools.DVBCompressor;
 import vigica.tools.DVBDecompressor;
+import vigica.tools.DuplicateFinder;
 
 /**
  *
@@ -67,18 +69,20 @@ import vigica.tools.DVBDecompressor;
 @Component
 public class FXMLMainController implements Initializable {
 
-    static private Error_Msg error_msg = new Error_Msg();
+    static private Message msg = new Message();
     final FileChooser fileChooser = new FileChooser();
     static private String[] perf = {"GENERAL", "INFO", "DOCUMENTARY", "MOVIES", "TV SHOW", "ZIC", "SPORT", "KIDS", "DIN", "MISC"}; 
 
-    @Autowired
-    Compare_mw_s1 compare;
     @Autowired
     DVBDecompressor decompressor;
     @Autowired
     IDBService serviceDB;
     @Autowired
     DVBCompressor generate;
+    @Autowired
+    Compare_mw_s1 compare;
+    @Autowired
+    DuplicateFinder duplicate;
 
     /**
     * The data as an observable list of Service.
@@ -87,8 +91,6 @@ public class FXMLMainController implements Initializable {
 
     private File currentDir = new File("src/test/resources");
 
-    @FXML
-    private Stage stage;
     @FXML
     private TableView<DVBService> serviceTable;
     @FXML
@@ -153,7 +155,7 @@ public class FXMLMainController implements Initializable {
                         	serviceDB.delete_bdd(service);
                         }
                         catch (HibernateException e) {
-                            error_msg.Error_diag("Error delete service BDD\n"+e.getMessage());
+                            msg.errorMessage("Error delete service BDD\n"+e.getMessage());
                         }
                     }
                 });
@@ -205,7 +207,7 @@ public class FXMLMainController implements Initializable {
                                             serviceDB.update_bdd(service);
                                         }
                                         catch (HibernateException e) {
-                                            error_msg.Error_diag("Error update BDD\n"+e.getMessage());
+                                            msg.errorMessage("Error update BDD\n"+e.getMessage());
                                         }
                                     }
                                 });
@@ -240,174 +242,114 @@ public class FXMLMainController implements Initializable {
                     serviceDB.update_bdd(service);
                 }
                 catch (HibernateException e) {
-                    error_msg.Error_diag("Error update BDD\n"+e.getMessage());
+                    msg.errorMessage("Error update BDD\n"+e.getMessage());
                 }
             }
         });
 
-        s_name.setDisable(true);
-        saveButton.setDisable(true);
-        compareButton.setDisable(true);
-        duplicateButton.setDisable(true);
-
+        enableComponents(false);
     }
 
     @FXML
     private void openAction(ActionEvent event) throws Exception {
 
-        stage = (Stage) serviceTable.getScene().getWindow();
         fileChooser.setTitle("Open Services File");
         fileChooser.setInitialDirectory(currentDir.exists() ? currentDir : null);
-        File file = fileChooser.showOpenDialog(stage);
+        File file = fileChooser.showOpenDialog((Stage) serviceTable.getScene().getWindow());
 
         if (file != null) {
 
             currentDir = file.getParentFile();
             decompressor.setDvbFile(file);
-            decompressor.reset();
-
-            pi.visibleProperty().bind(decompressor.runningProperty());
-            pi.progressProperty().bind(decompressor.progressProperty());
-
-            decompressor.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
-                @Override
-                public void handle(WorkerStateEvent t) {
-                    // print services into tableview
-                    serviceData.setAll(decompressor.getValue());
-                    serviceTable.setItems(serviceData);
-                    title.setText(file.getName());
-                    s_name.setDisable(false);
-                    s_name.clear();
-                    saveButton.setDisable(false);
-                    compareButton.setDisable(false);
-                    duplicateButton.setDisable(false);
-                }
-            });
-
-            decompressor.setOnFailed(new EventHandler<WorkerStateEvent>() {
-                @Override
-                public void handle(WorkerStateEvent t) {
-                    error_msg.Error_diag("Error save BDD\n" + decompressor.getException().getMessage());
-                }
-            });
-
-            decompressor.start();
+            handleTask(event, decompressor, file.getName(), "Opening file");
         }
     }
 
     @FXML
-    private void handleCompareAction(ActionEvent event) throws Exception {
+	private void saveAction(ActionEvent event) throws Exception {
+	
+    	if (serviceData.size() == 0) {
+	        msg.errorMessage("No service file loaded\n");
+	        return;
+	    }
+	    fileChooser.setTitle("Export Services");
+	    fileChooser.setInitialDirectory(currentDir.exists() ? currentDir : null);
+	    File file = fileChooser.showSaveDialog((Stage) serviceTable.getScene().getWindow());
+	
+	    if (file != null) {
+	        currentDir = file.getParentFile();
+	        generate.setDvbFile(file);
+	        handleTask(event, generate, file.getName(), "Save services");
+	    }
+	}
 
-        stage = (Stage) serviceTable.getScene().getWindow();
+	@FXML
+    private void compareAction(ActionEvent event) throws Exception {
+
+        // stage = (Stage) serviceTable.getScene().getWindow();
         if (serviceData.size() == 0) {
-            error_msg.Error_diag("No service file loaded\n");
+            msg.errorMessage("No service file loaded\n");
             return;
         }
         fileChooser.setTitle("Open Old Services");
         fileChooser.setInitialDirectory(currentDir.exists() ? currentDir : null);
-        File file = fileChooser.showOpenDialog(stage);
+        File file = fileChooser.showOpenDialog((Stage) serviceTable.getScene().getWindow());
 
         if (file != null) {
             currentDir = file.getParentFile();
-
-            pi.visibleProperty().bind(compare.runningProperty());
-            pi.progressProperty().bind(compare.progressProperty());
-            compare.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
-                @Override
-                public void handle(WorkerStateEvent t) {
-                    // print services into tableview
-                    serviceData.setAll(compare.getValue());
-                }
-            });
-            compare.setOnFailed(new EventHandler<WorkerStateEvent>() {
-                @Override
-                public void handle(WorkerStateEvent t) {
-                    error_msg.Error_diag("Error compare services\n" + compare.getException().getMessage());
-                }
-            });
-            
-
             compare.setDvbFile(file);
-            compare.reset();
-            compare.start();
+            handleTask(event, compare, null, "Compare files");
         }
     }
 
     @FXML
-    private void saveAction(ActionEvent event) {
+	private void duplicateAction(ActionEvent event) throws Exception {
 
-        stage = (Stage) serviceTable.getScene().getWindow();
-        if (serviceData.size() == 0) {
-            error_msg.Error_diag("No service file loaded\n");
-            return;
-        }
-        fileChooser.setTitle("Export Services");
-        fileChooser.setInitialDirectory(currentDir.exists() ? currentDir : null);
-        File file = fileChooser.showSaveDialog(stage);
+    	duplicate.setServices(serviceData);
+		handleTask(event, duplicate, null, "Remove duplicate");
+	}
 
-        if (file != null) {
-            currentDir = file.getParentFile();
+	@FXML
+    private void filterAction(KeyEvent event) {
 
-            generate.setDvbFile(file);
-            generate.reset();
-
-            pi.visibleProperty().bind(generate.runningProperty());
-            pi.progressProperty().bind(generate.progressProperty());
-            generate.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
-                @Override
-                public void handle(WorkerStateEvent t) {
-                    error_msg.Info_diag("Services saved");
-                }
-            });
-            generate.setOnFailed(new EventHandler<WorkerStateEvent>() {
-                @Override
-                public void handle(WorkerStateEvent t) {
-                    error_msg.Error_diag("Error compare services\n" + generate.getException().getMessage());
-                }
-            });
-
-            generate.start();
-        }
-    }
-
-    @FXML
-    private void handleFilterAction(KeyEvent event) {
-
-    	List<DVBService> services = serviceDB.read_bdd("%" + s_name.getText() + "%");
+    	List<DVBService> services = serviceDB.read_bdd(s_name.getText());
         serviceData.setAll(services);
     }
 
-    @FXML
-    private void handleDuplicateAction(ActionEvent event) {
-/*
-        pi.visibleProperty().bind(decompressor.duplicateTask.runningProperty());
-        pi.progressProperty().bind(decompressor.duplicateTask.progressProperty());
-        decompressor.duplicateTask.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
-            @Override
+    private void handleTask(ActionEvent event, Service<List<DVBService>> task, String zeTitle, String action) throws Exception {
+
+    	task.reset();
+        pi.visibleProperty().bind(task.runningProperty());
+        pi.progressProperty().bind(task.progressProperty());
+        task.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+
+			@Override
             public void handle(WorkerStateEvent t) {
                 // print services into tableview
-                serviceData.setAll(decompressor.duplicateTask.getValue());
+        		List<DVBService> dvbServices = task.getValue();
+        		if (dvbServices != null) {
+            		serviceData.setAll(dvbServices);
+            		serviceTable.setItems(serviceData);
+            	}
+
+                if (zeTitle != null) title.setText(zeTitle);
+                enableComponents(true);
             }
         });
-        decompressor.duplicateTask.setOnFailed(new EventHandler<WorkerStateEvent>() {
+
+        task.setOnFailed(new EventHandler<WorkerStateEvent>() {
             @Override
             public void handle(WorkerStateEvent t) {
-                error_msg.Error_diag("Error remove duplicate services\n" + decompressor.duplicateTask.getException().getMessage());
+                msg.errorMessage("Error " + action + "\n" + task.getException().getMessage());
             }
         });
 
-
-        decompressor.duplicateTask.setServices(serviceData);
-        new Thread(decompressor.duplicateTask).start();
-*/
+        task.start();
     }
-    
+
     class EditingCell extends TableCell<DVBService, String> {
 
         private TextField textField;
-
-        public EditingCell() {
-        }
 
         @Override
         public void startEdit() {
@@ -469,5 +411,12 @@ public class FXMLMainController implements Initializable {
             return getItem() == null ? "" : getItem().toString();
         }
     }
-    
+
+    private void enableComponents(boolean enable) {
+        s_name.setDisable(!enable);
+        s_name.clear();
+        saveButton.setDisable(!enable);
+        compareButton.setDisable(!enable);
+        duplicateButton.setDisable(!enable);
+	}
 }

@@ -13,13 +13,13 @@
       <Button fx:id="saveButton" layoutX="140.0" onAction="#saveAction" prefHeight="31.0" prefWidth="125.0" text="Save" textAlignment="CENTER">
       	<tooltip><Tooltip text="Save to an other file"/></tooltip>
       </Button>
-      <Button fx:id="compareButton" layoutX="280.0" onAction="#handleCompareAction" prefHeight="31.0" prefWidth="125.0" text="Compare" textAlignment="CENTER">
+      <Button fx:id="compareButton" layoutX="280.0" onAction="#compareAction" prefHeight="31.0" prefWidth="125.0" text="Compare" textAlignment="CENTER">
       	<tooltip><Tooltip text="Compare with an other file"/></tooltip>
       </Button>
-      <Button fx:id="duplicateButton" layoutX="414.0" onAction="#handleDuplicateAction" prefHeight="31.0" prefWidth="125.0" text="Duplicate" textAlignment="CENTER">
+      <Button fx:id="duplicateButton" layoutX="414.0" onAction="#duplicateAction" prefHeight="31.0" prefWidth="125.0" text="Duplicate" textAlignment="CENTER">
       	<tooltip><Tooltip text="Remove duplicated entries"/></tooltip>
       </Button>
-      <TextField fx:id="s_name" layoutX="193.0" layoutY="35.0" prefHeight="31.0" prefWidth="350.0" promptText="Name filter" onKeyReleased="#handleFilterAction" />
+      <TextField fx:id="s_name" layoutX="193.0" layoutY="35.0" prefHeight="31.0" prefWidth="350.0" promptText="Name filter" onKeyReleased="#filterAction" />
       <ProgressBar fx:id="pi" layoutX="553.0" layoutY="6.0" prefHeight="23.0" prefWidth="550.0" progress="0.0" />
       <TableView fx:id="serviceTable" layoutX="-5.0" layoutY="71.0" prefHeight="769.0" prefWidth="1024.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="71.0">
         <columns>

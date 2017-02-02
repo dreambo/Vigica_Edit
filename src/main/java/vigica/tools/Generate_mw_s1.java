@@ -141,10 +141,10 @@ public class Generate_mw_s1 extends DVBCompressor {
     }
 
 	@Override
-	protected Task<Void> createTask() {
-		return new Task<Void>() {
+	protected Task<List<DVBService>> createTask() {
+		return new Task<List<DVBService>>() {
 			@Override
-			protected Void call() throws Exception {
+			protected List<DVBService> call() throws Exception {
 	            updateProgress(-1, 0);
 	            compress(bdd.read_bdd());
 	            updateProgress(1, 1);

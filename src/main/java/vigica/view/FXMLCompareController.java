@@ -20,6 +20,8 @@ import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import org.springframework.stereotype.Component;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -32,6 +34,7 @@ import vigica.model.DVBService;
  *
  * @author bnabi
  */
+@Component
 public class FXMLCompareController implements Initializable {
 
     /**

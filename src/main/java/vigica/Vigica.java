@@ -47,7 +47,7 @@ public class Vigica extends Application {
 	private static String[] args;
 
     private Stage primaryStage;
-	private ConfigurableApplicationContext applicationContext;
+	private static ConfigurableApplicationContext applicationContext;
 
 	@Override
 	public void init() throws Exception {
@@ -124,10 +124,10 @@ public class Vigica extends Application {
     	launch(Vigica.class, Vigica.args = args);
     }
 
-    public Object load(String url) {
+    public static Object load(String url) {
         FXMLLoader loader = new FXMLLoader();
         loader.setControllerFactory(clazz -> applicationContext.getBean(clazz));
-        loader.setLocation(getClass().getResource(url));
+        loader.setLocation(Vigica.class.getResource(url));
 
         try {
             return loader.load();

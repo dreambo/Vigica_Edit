@@ -6,7 +6,7 @@ import java.util.List;
 import javafx.concurrent.Service;
 import vigica.model.DVBService;
 
-public abstract class DVBCompressor extends Service<Void> {
+public abstract class DVBCompressor extends Service<List<DVBService>> {
 
 	public abstract void setDvbFile(File dvbFile);
 
