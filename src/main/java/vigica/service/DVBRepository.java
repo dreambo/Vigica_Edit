@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import vigica.model.DVBService;
 
 @Repository
-interface DBRepository extends JpaRepository<DVBService, Integer> {
+interface DVBRepository<T extends DVBService> extends JpaRepository<T, Integer> {
 
-	public List<DVBService> findByNameContainingIgnoreCase(String name);
+	public List<T> findByNameContainingIgnoreCase(String name);
 }

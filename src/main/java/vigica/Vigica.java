@@ -17,7 +17,6 @@
 package vigica;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -58,8 +57,6 @@ public class Vigica extends Application {
 
 	@Override
 	public void stop() throws Exception {
-
-		System.out.println(Arrays.toString(applicationContext.getBeanDefinitionNames()));
 		super.stop();
 		applicationContext.close();
 	}
@@ -108,7 +105,8 @@ public class Vigica extends Application {
     public void showServiceOverview(AnchorPane rootLayout) {
         try {
             // Load main view.
-            AnchorPane serviceOverview = (AnchorPane) load("/vigica/view/FXMLMain.fxml");
+            // AnchorPane serviceOverview = (AnchorPane) load("/vigica/view/FXMLMain.fxml"); // FXMLMain_with_tabs.fxml
+        	AnchorPane serviceOverview = (AnchorPane) load("/vigica/view/FXMLMain_with_tabs.fxml");
 
             // Set service overview into the center of root layout.
             rootLayout.getChildren().add(serviceOverview);

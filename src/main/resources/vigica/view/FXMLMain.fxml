@@ -21,7 +21,7 @@
       </Button>
       <TextField fx:id="s_name" layoutX="193.0" layoutY="35.0" prefHeight="31.0" prefWidth="350.0" promptText="Name filter" onKeyReleased="#filterAction" />
       <ProgressBar fx:id="pi" layoutX="553.0" layoutY="6.0" prefHeight="23.0" prefWidth="550.0" progress="0.0" />
-      <TableView fx:id="serviceTable" layoutX="-5.0" layoutY="71.0" prefHeight="769.0" prefWidth="1024.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="71.0">
+      <TableView fx:id="serviceDVBS2Table" layoutX="-5.0" layoutY="71.0" prefHeight="769.0" prefWidth="1024.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="71.0">
         <columns>
             <TableColumn fx:id="s_idxColumn" prefWidth="110.0" text="ID" />
             <TableColumn fx:id="s_typeColumn" prefWidth="70.0" text="Type" />

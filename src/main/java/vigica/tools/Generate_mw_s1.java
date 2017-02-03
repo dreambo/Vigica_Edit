@@ -23,21 +23,20 @@ import java.util.List;
 
 import javafx.concurrent.Task;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import vigica.model.DVBService;
-import vigica.service.IDBService;
+import vigica.service.IDVBDBService;
 
 /**
  *
  * @author bnabi
  */
 @Component
-public class Generate_mw_s1 extends DVBWriter {
+public class Generate_mw_s1<T extends DVBService> extends DVBWriter<T> {
 
-	@Autowired
-    private IDBService bdd;
+	// @Autowired
+    private IDVBDBService<T> bdd;
 	private File dvbFile;
 	private List<Byte> fileVersion = Arrays.asList((byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x0C); // file version 4 bytes
 
@@ -58,12 +57,12 @@ public class Generate_mw_s1 extends DVBWriter {
      * @param chemin
      */
 	@Override
-    public void compress(List<DVBService> services) throws Exception {
+    public void compress(List<T> services) throws Exception {
 
     	List<Byte> satservices = new ArrayList<>();
     	List<Byte> sdata;
 
-        for (DVBService service : services) {
+        for (T service : services) {
             if (!service.getFlag()) {
                 sdata = ByteUtils.hexStringToBytes(service.getLine());
                 satservices.addAll(sdata);
@@ -150,10 +149,10 @@ public class Generate_mw_s1 extends DVBWriter {
     }
 
 	@Override
-	protected Task<List<DVBService>> createTask() {
-		return new Task<List<DVBService>>() {
+	protected Task<List<T>> createTask() {
+		return new Task<List<T>>() {
 			@Override
-			protected List<DVBService> call() throws Exception {
+			protected List<T> call() throws Exception {
 	            updateProgress(-1, 0);
 	            compress(bdd.read_bdd());
 	            updateProgress(1, 1);

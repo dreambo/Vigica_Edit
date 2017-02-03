@@ -35,27 +35,27 @@ import vigica.model.DVBService;
  * @author bnabi
  */
 @Component
-public class FXMLCompareController implements Initializable {
+public class FXMLCompareController<T extends DVBService> implements Initializable {
 
     /**
     * The data as an observable list of Service.
     */
-    private ObservableList<DVBService> serviceData = FXCollections.observableArrayList();
+    private ObservableList<T> serviceData = FXCollections.observableArrayList();
 
     // @FXML
     // private Stage stage;
     @FXML
-    private TableView<DVBService> serviceTable;
+    private TableView<T> serviceTable;
     @FXML
-    private TableColumn<DVBService, Integer> s_idxColumn;
+    private TableColumn<T, Integer> s_idxColumn;
     @FXML
-    private TableColumn<DVBService, String> s_nameColumn;
+    private TableColumn<T, String> s_nameColumn;
     @FXML
-    private TableColumn<DVBService, String> s_typeColumn;
+    private TableColumn<T, String> s_typeColumn;
     @FXML
-    private TableColumn<DVBService, Integer> s_nidColumn;
+    private TableColumn<T, Integer> s_nidColumn;
     @FXML
-    private TableColumn<DVBService, String> s_pprColumn;
+    private TableColumn<T, String> s_pprColumn;
 
     /**
      * The constructor.
@@ -63,7 +63,7 @@ public class FXMLCompareController implements Initializable {
      */
     public FXMLCompareController() {}
 
-    public void setServices(List<DVBService> services) {
+    public void setServices(List<T> services) {
         serviceData.setAll(services);
         serviceTable.setItems(serviceData);
     }

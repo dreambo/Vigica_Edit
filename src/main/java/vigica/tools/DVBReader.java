@@ -5,7 +5,7 @@ import java.util.List;
 
 import vigica.model.DVBService;
 
-public interface DVBReader {
+public interface DVBReader<T extends DVBService> {
 
 	public abstract void setDvbFile(File dvbFile);
 
@@ -14,7 +14,7 @@ public interface DVBReader {
 	 * @param file
 	 * @throws java.lang.Exception
 	 */
-	public abstract List<DVBService> decompress() throws Exception;
+	public abstract List<T> decompress() throws Exception;
 
 	public abstract List<Byte> getFileVersion();
 }

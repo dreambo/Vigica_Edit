@@ -28,7 +28,7 @@ public class ByteUtils {
 
         return -1;
     }
-    
+
     public static int getInt(byte[] in) {
         int val = ((in[0] & 0xff) << 8) | (in[1] & 0xff);
         return val;

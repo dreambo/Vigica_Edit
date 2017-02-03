@@ -28,23 +28,26 @@ import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import vigica.model.DVBService;
-import vigica.service.IDBService;
+import vigica.service.IDVBDBService;
 import vigica.view.Message;
 
-public abstract class AbstractReader extends Service<List<DVBService>> {
+public abstract class AbstractReader<T extends DVBService> extends Service<List<T>> {
 
 	private static final Logger LOG = Logger.getLogger(AbstractReader.class);
 
     private File dvbFile;
     private List<Byte> fileVersion;
 
-    @Autowired
-    private IDBService bdd;
+    // @Autowired
+    private IDVBDBService<T> bdd;
 
     public AbstractReader() {}
+
+	public void setServiceDB(IDVBDBService<T> bdd) {
+        this.bdd = bdd;
+    }
 
 	public void setDvbFile(File dvbFile) {
         this.dvbFile = dvbFile;
@@ -54,10 +57,10 @@ public abstract class AbstractReader extends Service<List<DVBService>> {
     	return fileVersion;
     }
 
-	public List<DVBService> decompress() throws Exception {
+	public List<T> decompress() throws Exception {
 
     	byte[] bindata;
-    	List<DVBService> services = new ArrayList<>();
+    	List<T> services = new ArrayList<>();
 
         bindata = Files.readAllBytes(Paths.get(dvbFile.getAbsolutePath()));
         int binl = bindata.length;
@@ -100,7 +103,9 @@ public abstract class AbstractReader extends Service<List<DVBService>> {
             String rcdname_s = new String(entryName, "UTF-8");
             String binrcd_s = ByteUtils.bytesToHexString(entry);
             // String asciiname = stype + "~" + recd_idx + "~" + rcdname_s + "~E0~" + "N" + nid_d + "~" + "P" + ppr_s;
-            services.add(new DVBService(stype, ++recd_idx, rcdname_s, nid_d, ppr_s, binrcd_s, false, ""));
+            T service = getDVBService(stype, ++recd_idx, rcdname_s, nid_d, ppr_s, binrcd_s, false, "");
+
+            services.add(service);
             bind_idx = nxt_idx + offset;
 
         } catch (Exception e) {
@@ -110,7 +115,9 @@ public abstract class AbstractReader extends Service<List<DVBService>> {
         return services;
     }
 
-    protected abstract int getOffset(byte version);
+	protected abstract T getDVBService(String stype, int i, String rcdname_s, int nid_d, String ppr_s, String binrcd_s, boolean b, String string);
+
+	protected abstract int getOffset(byte version);
 
 	protected abstract byte[] getEndMagic();
 
@@ -150,21 +157,21 @@ public abstract class AbstractReader extends Service<List<DVBService>> {
     }
 
 	@Override
-	protected Task<List<DVBService>> createTask() {
+	protected Task<List<T>> createTask() {
 		
-		return new Task<List<DVBService>>() {
+		return new Task<List<T>>() {
 
 			@Override
-			protected List<DVBService> call() throws Exception {
+			protected List<T> call() throws Exception {
 
 				int countOK = 0;
 	            int countKO = 0;
 
 	            updateProgress(-1, 0);
-	            List<DVBService> services = decompress();
+	            List<T> services = decompress();
 
 	            // Add to database
-	            for (DVBService service : services) try {
+	            for (T service : services) try {
 	                updateProgress(countOK + countKO, services.size());
 	                bdd.save_bdd(service);
 	                countOK++;

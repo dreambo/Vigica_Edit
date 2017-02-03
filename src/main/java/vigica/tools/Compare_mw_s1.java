@@ -30,12 +30,11 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import vigica.Vigica;
 import vigica.model.DVBService;
-import vigica.service.IDBService;
+import vigica.service.IDVBDBService;
 import vigica.view.FXMLCompareController;
 
 /**
@@ -43,38 +42,36 @@ import vigica.view.FXMLCompareController;
  * @author bnabi
  */
 @Component
-public class Compare_mw_s1 extends Service<List<DVBService>> {
+public class Compare_mw_s1<T extends DVBService> extends Service<List<T>> {
 
-	public List<DVBService> servicesLost = new ArrayList<>();
+	public List<T> servicesLost = new ArrayList<>();
     private File dvbFile;
 
-    @Autowired
-    private DVBReader decompress;
-    @Autowired
-    private IDBService bdd;
-    @Autowired
-    private FXMLCompareController compareController;
+    // @Autowired
+    private DVBReader<T> reader;
+    // @Autowired
+    private IDVBDBService<T> bdd;
+    // @Autowired
+    private FXMLCompareController<T> compareController;
 
-    private List<DVBService> getLostServices() {
+    private List<T> getLostServices() {
         return servicesLost;
     }
-
-    public Compare_mw_s1() {}
 
     public void setDvbFile(File dvbFile) {
     	this.dvbFile = dvbFile;
     }
 
-    private void detectNew(List<DVBService> services, List<DVBService> servicesOld) throws Exception {
+    private void detectNew(List<T> services, List<T> servicesOld) throws Exception {
 
     	Boolean isNew;
         String name;
         String oldName;
 
-        for (DVBService service : services) {
+        for (T service : services) {
             isNew = true;
 
-            for (DVBService serviceOld : servicesOld) {
+            for (T serviceOld : servicesOld) {
             	name = service.getName();
             	oldName = serviceOld.getName();
 
@@ -90,18 +87,18 @@ public class Compare_mw_s1 extends Service<List<DVBService>> {
         }
     }
 
-    private void integratePPR(List<DVBService> services, List<DVBService> servicesOld) throws Exception {
+    private void integratePPR(List<T> services, List<T> servicesOld) throws Exception {
 
     	Boolean isFind;
         servicesLost.clear();
 
-        for (DVBService serviceOld : servicesOld) {
+        for (T serviceOld : servicesOld) {
             isFind = false;
             String line;
             String lineOld;
 
             if (serviceOld.getPpr().length() != 0) {
-                for (DVBService service : services) {
+                for (T service : services) {
                     line = service.getName();
                     lineOld = serviceOld.getName();
 
@@ -117,12 +114,13 @@ public class Compare_mw_s1 extends Service<List<DVBService>> {
             }
 
             if (!isFind) {
-                servicesLost.add(new DVBService(serviceOld.getType(), serviceOld.getIdx(), serviceOld.getName(), serviceOld.getNid(), serviceOld.getPpr(), serviceOld.getLine(), serviceOld.getFlag(), serviceOld.getNeew()));
+            	T service = (T) new DVBService(serviceOld.getType(), serviceOld.getIdx(), serviceOld.getName(), serviceOld.getNid(), serviceOld.getPpr(), serviceOld.getLine(), serviceOld.getFlag(), serviceOld.getNeew());
+                servicesLost.add(service);
             }
         }
     }
 
-    private void showOldPPR(List<DVBService> services) {
+    private void showOldPPR(List<T> services) {
 
         Stage modal_dialog = new Stage(StageStyle.DECORATED);
         modal_dialog.initModality(Modality.NONE);
@@ -138,20 +136,20 @@ public class Compare_mw_s1 extends Service<List<DVBService>> {
     }
 
 	@Override
-	protected Task<List<DVBService>> createTask() {
+	protected Task<List<T>> createTask() {
 
-		return new Task<List<DVBService>>() {
+		return new Task<List<T>>() {
 
 			@Override
-			protected List<DVBService> call() throws Exception {
-	            List<DVBService> services;
-	            List<DVBService> servicesOld;
-	            List<DVBService> servicesNew;
+			protected List<T> call() throws Exception {
+	            List<T> services;
+	            List<T> servicesOld;
+	            List<T> servicesNew;
 	            int count = 0;
 
 	            updateProgress(-1, 0);
-	            decompress.setDvbFile(dvbFile);
-	            servicesOld = decompress.decompress();
+	            reader.setDvbFile(dvbFile);
+	            servicesOld = reader.decompress();
 
 	            services = bdd.read_bdd();
 
@@ -159,7 +157,7 @@ public class Compare_mw_s1 extends Service<List<DVBService>> {
 	            integratePPR(services, servicesOld);
 	            servicesNew = getLostServices();
 
-	            for(DVBService service : services){
+	            for(T service : services){
 	                count++;
 	                updateProgress(count, services.size());
 	                bdd.save_bdd(service);

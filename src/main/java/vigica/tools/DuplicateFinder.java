@@ -24,11 +24,10 @@ import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import vigica.model.DVBService;
-import vigica.service.IDBService;
+import vigica.service.IDVBDBService;
 
 /**
  * Util class for file decomposition
@@ -40,8 +39,8 @@ public class DuplicateFinder extends Service<List<DVBService>> {
 
 	private static final Logger LOG = Logger.getLogger(DuplicateFinder.class);
 
-    @Autowired
-    private IDBService bdd;
+    // @Autowired
+    private IDVBDBService<DVBService> bdd;
     private ObservableList<DVBService> services;
 
     public DuplicateFinder() {}

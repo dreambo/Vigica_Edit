@@ -28,11 +28,10 @@ import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import vigica.model.DVBService;
-import vigica.service.IDBService;
+import vigica.service.IDVBDBService;
 import vigica.view.Message;
 
 /**
@@ -41,7 +40,7 @@ import vigica.view.Message;
  * @author nabillo
  */
 @Component
-public class Decompress_mw_s1 extends Service<List<DVBService>> implements DVBReader {
+public class Decompress_mw_s1<T extends DVBService> extends Service<List<T>> implements DVBReader<T> {
 
 	private static final Logger LOG = Logger.getLogger(Decompress_mw_s1.class);
 	// private static final byte[] END_MAGIC = {(byte) 0x00, (byte) 0x00, (byte) 0x3F, (byte) 0xFF};
@@ -50,10 +49,8 @@ public class Decompress_mw_s1 extends Service<List<DVBService>> implements DVBRe
     private File dvbFile;
     private List<Byte> fileVersion;
 
-    @Autowired
-    private IDBService bdd;
-
-    public Decompress_mw_s1() {}
+    // @Autowired
+    private IDVBDBService<T> bdd;
 
     @Override
 	public void setDvbFile(File dvbFile) {
@@ -66,10 +63,10 @@ public class Decompress_mw_s1 extends Service<List<DVBService>> implements DVBRe
     }
 
     @Override
-	public List<DVBService> decompress() throws Exception {
+	public List<T> decompress() throws Exception {
 
     	byte[] bindata;
-    	List<DVBService> services = new ArrayList<>();
+    	List<T> services = new ArrayList<>();
 
         bindata = Files.readAllBytes(Paths.get(dvbFile.getAbsolutePath()));
         int binl = bindata.length;
@@ -113,7 +110,8 @@ public class Decompress_mw_s1 extends Service<List<DVBService>> implements DVBRe
             String rcdname_s = new String(entryName, "UTF-8");
             String binrcd_s = ByteUtils.bytesToHexString(entry);
             // String asciiname = stype + "~" + recd_idx + "~" + rcdname_s + "~E0~" + "N" + nid_d + "~" + "P" + ppr_s;
-            services.add(new DVBService(stype, ++recd_idx, rcdname_s, nid_d, ppr_s, binrcd_s, false, ""));
+            T service = (T) new DVBService(stype, ++recd_idx, rcdname_s, nid_d, ppr_s, binrcd_s, false, "");
+            services.add(service);
             bind_idx = nxt_idx + offset;
 
         } catch (Exception e) {
@@ -159,21 +157,21 @@ public class Decompress_mw_s1 extends Service<List<DVBService>> implements DVBRe
     }
 
 	@Override
-	protected Task<List<DVBService>> createTask() {
+	protected Task<List<T>> createTask() {
 		
-		return new Task<List<DVBService>>() {
+		return new Task<List<T>>() {
 
 			@Override
-			protected List<DVBService> call() throws Exception {
+			protected List<T> call() throws Exception {
 
 				int countOK = 0;
 	            int countKO = 0;
 
 	            updateProgress(-1, 0);
-	            List<DVBService> services = decompress();
+	            List<T> services = decompress();
 
 	            // Add to database
-	            for (DVBService service : services) try {
+	            for (T service : services) try {
 	                updateProgress(countOK + countKO, services.size());
 	                bdd.save_bdd(service);
 	                countOK++;

@@ -1,5 +1,8 @@
 package vigica.model;
 
+import javax.persistence.Entity;
+
+@Entity
 public class DVBT2Service extends DVBService {
 
 	public DVBT2Service() {
