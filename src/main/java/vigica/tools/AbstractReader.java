@@ -29,23 +29,14 @@ import javafx.concurrent.Task;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import vigica.model.DVBService;
 import vigica.service.IDBService;
 import vigica.view.Message;
 
-/**
- * Util class for file decomposition
- * 
- * @author nabillo
- */
-@Component
-public class Decompress_mw_s1 extends Service<List<DVBService>> implements DVBReader {
+public abstract class AbstractReader extends Service<List<DVBService>> {
 
-	private static final Logger LOG = Logger.getLogger(Decompress_mw_s1.class);
-	// private static final byte[] END_MAGIC = {(byte) 0x00, (byte) 0x00, (byte) 0x3F, (byte) 0xFF};
-	private static final byte[] END_MAGIC = {(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x00};
+	private static final Logger LOG = Logger.getLogger(AbstractReader.class);
 
     private File dvbFile;
     private List<Byte> fileVersion;
@@ -53,19 +44,16 @@ public class Decompress_mw_s1 extends Service<List<DVBService>> implements DVBRe
     @Autowired
     private IDBService bdd;
 
-    public Decompress_mw_s1() {}
+    public AbstractReader() {}
 
-    @Override
 	public void setDvbFile(File dvbFile) {
         this.dvbFile = dvbFile;
     }
 
-    @Override
     public List<Byte> getFileVersion() {
     	return fileVersion;
     }
 
-    @Override
 	public List<DVBService> decompress() throws Exception {
 
     	byte[] bindata;
@@ -86,11 +74,10 @@ public class Decompress_mw_s1 extends Service<List<DVBService>> implements DVBRe
         int recd_nmbr_d = ByteBuffer.wrap(recd_nmbr_s).getInt();
         int recd_idx = 0;
         int bind_idx = 16;
-        // int offset = (fileVersion.get(3) == 0x0E ? (4*16 + 2) : 0);
-        int offset = (fileVersion.get(3) == 0x0E ? (4*16 + 3) : 0);
+        int offset = getOffset(fileVersion.get(3));
 
         while (recd_idx < recd_nmbr_d) try {
-            int nxt_idx = ByteUtils.find_end(bindata, bind_idx, END_MAGIC);
+            int nxt_idx = ByteUtils.find_end(bindata, bind_idx, getEndMagic());
             byte[] entry = Arrays.copyOfRange(bindata, bind_idx, nxt_idx + offset);
             int entryLength = nxt_idx - bind_idx;
             // create record file name
@@ -123,7 +110,11 @@ public class Decompress_mw_s1 extends Service<List<DVBService>> implements DVBRe
         return services;
     }
 
-    private String getPreference(byte[] ppr) {
+    protected abstract int getOffset(byte version);
+
+	protected abstract byte[] getEndMagic();
+
+	private String getPreference(byte[] ppr) {
         String ppr_s ="";
         Boolean isFirst = true;
 

@@ -49,7 +49,7 @@ public class Compare_mw_s1 extends Service<List<DVBService>> {
     private File dvbFile;
 
     @Autowired
-    private DVBDecompressor decompress;
+    private DVBReader decompress;
     @Autowired
     private IDBService bdd;
     @Autowired

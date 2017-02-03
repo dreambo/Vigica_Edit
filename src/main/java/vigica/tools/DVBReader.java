@@ -3,10 +3,9 @@ package vigica.tools;
 import java.io.File;
 import java.util.List;
 
-import javafx.concurrent.Service;
 import vigica.model.DVBService;
 
-public abstract class DVBDecompressor extends Service<List<DVBService>> {
+public interface DVBReader {
 
 	public abstract void setDvbFile(File dvbFile);
 
@@ -17,4 +16,5 @@ public abstract class DVBDecompressor extends Service<List<DVBService>> {
 	 */
 	public abstract List<DVBService> decompress() throws Exception;
 
+	public abstract List<Byte> getFileVersion();
 }

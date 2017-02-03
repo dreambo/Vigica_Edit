@@ -17,6 +17,7 @@
 package vigica;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -58,6 +59,7 @@ public class Vigica extends Application {
 	@Override
 	public void stop() throws Exception {
 
+		System.out.println(Arrays.toString(applicationContext.getBeanDefinitionNames()));
 		super.stop();
 		applicationContext.close();
 	}

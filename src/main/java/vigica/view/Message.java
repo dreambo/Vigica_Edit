@@ -25,8 +25,10 @@ import javafx.scene.control.Alert.AlertType;
  * @author bnabi
  */
 public class Message {
-    
-    public void errorMessage(String msg) {
+
+	private Message() {}
+
+	public static void errorMessage(String msg) {
         Alert alert = new Alert(AlertType.ERROR);
         alert.setTitle("Error");
         alert.setHeaderText(null);
@@ -35,7 +37,7 @@ public class Message {
         alert.showAndWait();
     }
     
-    public void infoMessage(String msg) {
+    public static void infoMessage(String msg) {
         Alert alert = new Alert(AlertType.INFORMATION);
         alert.setTitle("Info");
         alert.setHeaderText(null);

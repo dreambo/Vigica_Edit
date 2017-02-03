@@ -47,7 +47,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.FileChooser;
-import javafx.stage.Stage;
 import javafx.util.Callback;
 
 import org.hibernate.HibernateException;
@@ -56,10 +55,12 @@ import org.springframework.stereotype.Component;
 
 import vigica.model.DVBService;
 import vigica.service.IDBService;
+import vigica.tools.AbstractReader;
 import vigica.tools.ByteUtils;
 import vigica.tools.Compare_mw_s1;
-import vigica.tools.DVBCompressor;
-import vigica.tools.DVBDecompressor;
+import vigica.tools.DVBS2Reader;
+import vigica.tools.DVBT2Reader;
+import vigica.tools.DVBWriter;
 import vigica.tools.DuplicateFinder;
 
 /**
@@ -69,20 +70,29 @@ import vigica.tools.DuplicateFinder;
 @Component
 public class FXMLMainController implements Initializable {
 
-    static private Message msg = new Message();
-    final FileChooser fileChooser = new FileChooser();
+    private static final String DVB_S_MW_S1 = "dvb_s_mw_s1";
+	private static final String DVB_T_MW_S1 = "dvb_t_mw_s1";
+
+	final FileChooser fileChooser = new FileChooser();
     static private String[] perf = {"GENERAL", "INFO", "DOCUMENTARY", "MOVIES", "TV SHOW", "ZIC", "SPORT", "KIDS", "DIN", "MISC"}; 
 
-    @Autowired
-    DVBDecompressor decompressor;
+    // @Autowired
+    AbstractReader reader;
     @Autowired
     IDBService serviceDB;
     @Autowired
-    DVBCompressor generate;
+    DVBWriter generate;
     @Autowired
     Compare_mw_s1 compare;
     @Autowired
     DuplicateFinder duplicate;
+
+    // test
+    @Autowired
+    DVBT2Reader dvbt2reader;
+    @Autowired
+    DVBS2Reader dvbs2reader;
+    // /test
 
     /**
     * The data as an observable list of Service.
@@ -155,7 +165,7 @@ public class FXMLMainController implements Initializable {
                         	serviceDB.delete_bdd(service);
                         }
                         catch (HibernateException e) {
-                            msg.errorMessage("Error delete service BDD\n"+e.getMessage());
+                            Message.errorMessage("Error delete service BDD\n"+e.getMessage());
                         }
                     }
                 });
@@ -207,7 +217,7 @@ public class FXMLMainController implements Initializable {
                                             serviceDB.update_bdd(service);
                                         }
                                         catch (HibernateException e) {
-                                            msg.errorMessage("Error update BDD\n"+e.getMessage());
+                                            Message.errorMessage("Error update BDD\n"+e.getMessage());
                                         }
                                     }
                                 });
@@ -242,7 +252,7 @@ public class FXMLMainController implements Initializable {
                     serviceDB.update_bdd(service);
                 }
                 catch (HibernateException e) {
-                    msg.errorMessage("Error update BDD\n"+e.getMessage());
+                    Message.errorMessage("Error update BDD\n"+e.getMessage());
                 }
             }
         });
@@ -255,30 +265,51 @@ public class FXMLMainController implements Initializable {
 
         fileChooser.setTitle("Open Services File");
         fileChooser.setInitialDirectory(currentDir.exists() ? currentDir : null);
-        File file = fileChooser.showOpenDialog((Stage) serviceTable.getScene().getWindow());
+        File file = fileChooser.showOpenDialog(serviceTable.getScene().getWindow());
 
         if (file != null) {
 
             currentDir = file.getParentFile();
-            decompressor.setDvbFile(file);
-            handleTask(event, decompressor, file.getName(), "Opening file");
+            String fileName = file.getName();
+            reader = getReader(fileName);
+            if (reader == null) {
+            	Message.errorMessage("Wrong file, only files starting with " + DVB_S_MW_S1 + " or " + DVB_T_MW_S1 + " are accepted!");
+            	return;
+            }
+
+            reader.setDvbFile(file);
+            handleTask(event, (Service<List<DVBService>>) reader, fileName, "Opening file");
         }
     }
 
-    @FXML
+    private AbstractReader getReader(String fileName) {
+
+    	if (fileName.toLowerCase().startsWith(DVB_S_MW_S1)) {
+    		return dvbs2reader;
+    	}
+
+    	if (fileName.toLowerCase().startsWith(DVB_T_MW_S1)) {
+    		return dvbt2reader;
+    	}
+
+		return null;
+	}
+
+	@FXML
 	private void saveAction(ActionEvent event) throws Exception {
 	
     	if (serviceData.size() == 0) {
-	        msg.errorMessage("No service file loaded\n");
+	        Message.errorMessage("No service file loaded\n");
 	        return;
 	    }
 	    fileChooser.setTitle("Export Services");
 	    fileChooser.setInitialDirectory(currentDir.exists() ? currentDir : null);
-	    File file = fileChooser.showSaveDialog((Stage) serviceTable.getScene().getWindow());
+	    File file = fileChooser.showSaveDialog(serviceTable.getScene().getWindow());
 	
 	    if (file != null) {
 	        currentDir = file.getParentFile();
 	        generate.setDvbFile(file);
+	        generate.setFileVersion(reader.getFileVersion());
 	        handleTask(event, generate, file.getName(), "Save services");
 	    }
 	}
@@ -286,14 +317,13 @@ public class FXMLMainController implements Initializable {
 	@FXML
     private void compareAction(ActionEvent event) throws Exception {
 
-        // stage = (Stage) serviceTable.getScene().getWindow();
         if (serviceData.size() == 0) {
-            msg.errorMessage("No service file loaded\n");
+            Message.errorMessage("No service file loaded\n");
             return;
         }
         fileChooser.setTitle("Open Old Services");
         fileChooser.setInitialDirectory(currentDir.exists() ? currentDir : null);
-        File file = fileChooser.showOpenDialog((Stage) serviceTable.getScene().getWindow());
+        File file = fileChooser.showOpenDialog(serviceTable.getScene().getWindow());
 
         if (file != null) {
             currentDir = file.getParentFile();
@@ -340,7 +370,7 @@ public class FXMLMainController implements Initializable {
         task.setOnFailed(new EventHandler<WorkerStateEvent>() {
             @Override
             public void handle(WorkerStateEvent t) {
-                msg.errorMessage("Error " + action + "\n" + task.getException().getMessage());
+                Message.errorMessage("Error " + action + "\n" + task.getException().getMessage());
             }
         });
 

@@ -10,8 +10,6 @@ import java.util.List;
 
 public class ByteUtils {
 
-	private static final byte[] END_MAGIC = {(byte) 0x00, (byte) 0x00, (byte) 0x3f, (byte) 0xff};
-
     public static String bytesToHexString(byte[] in) {
         final StringBuilder builder = new StringBuilder();
         for (byte b : in) {
@@ -20,14 +18,15 @@ public class ByteUtils {
         return builder.toString();
     }
 
-    public static int find_end(byte[] bindata, int strt) {
-        int sidx;
-        for (sidx = strt; sidx <strt+1000; sidx++)
-        {   
-            if (Arrays.equals(Arrays.copyOfRange(bindata, sidx, sidx+4), END_MAGIC))
-                break;
+    public static int find_end(byte[] bindata, int strt, byte[] endMagic) {
+
+        for (int sidx = strt; sidx < (strt + 1000); sidx++) {   
+            if (Arrays.equals(Arrays.copyOfRange(bindata, sidx, sidx + endMagic.length), endMagic)) {
+            	return (sidx + endMagic.length);
+            }
         }
-        return sidx+4;
+
+        return -1;
     }
     
     public static int getInt(byte[] in) {
