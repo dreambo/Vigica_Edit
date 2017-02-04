@@ -27,7 +27,7 @@
       <ProgressBar fx:id="pi" layoutX="553.0" layoutY="6.0" prefHeight="23.0" prefWidth="550.0" progress="0.0" />
       <Label fx:id="title" layoutX="703.0" layoutY="39.0" prefHeight="23.0" prefWidth="375.0" textFill="#000000b6" />
 
-      <TabPane layoutX="14.0" layoutY="73.0" prefHeight="601.0" prefWidth="636.0" tabClosingPolicy="UNAVAILABLE">
+      <TabPane fx:id="tabPane" layoutX="14.0" layoutY="73.0" prefHeight="601.0" prefWidth="636.0" tabClosingPolicy="UNAVAILABLE">
         <tabs>
           <Tab text="DVB-S2">
                <content>

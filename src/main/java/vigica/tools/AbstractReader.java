@@ -79,8 +79,13 @@ public abstract class AbstractReader<T extends DVBService> extends Service<List<
         int bind_idx = 16;
         int offset = getOffset(fileVersion.get(3));
 
-        while (recd_idx < recd_nmbr_d) try {
+        while (recd_idx < recd_nmbr_d) {
             int nxt_idx = ByteUtils.find_end(bindata, bind_idx, getEndMagic());
+            if (nxt_idx < 0) {
+            	LOG.error("Can not find magic end " + getEndMagic());
+            	return services;
+            }
+
             byte[] entry = Arrays.copyOfRange(bindata, bind_idx, nxt_idx + offset);
             int entryLength = nxt_idx - bind_idx;
             // create record file name
@@ -107,9 +112,6 @@ public abstract class AbstractReader<T extends DVBService> extends Service<List<
 
             services.add(service);
             bind_idx = nxt_idx + offset;
-
-        } catch (Exception e) {
-            throw new Exception(e.getCause().getMessage());
         }
 
         return services;

@@ -3,7 +3,10 @@ package vigica.service;
 import java.util.Collection;
 import java.util.List;
 
+import org.h2.server.web.WebServlet;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.servlet.ServletRegistrationBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 import vigica.model.DVBS2Service;
@@ -27,19 +30,19 @@ public class DVBS2DBService implements IDVBDBService<DVBS2Service> {
     }
     
     @Override
-	public void save_bdd(DVBS2Service service)  {
+	public void save_bdd(DVBS2Service service) {
 
     	repository.save(service);
     }
     
     @Override
-	public void save_bdd (Collection<DVBS2Service> services)  {
+	public void save_bdd (Collection<DVBS2Service> services) {
 
     	repository.save(services);
     }
     
     @Override
-	public void update_bdd(DVBS2Service service)  {
+	public void update_bdd(DVBS2Service service) {
 
     	repository.save(service);
     }
@@ -50,12 +53,10 @@ public class DVBS2DBService implements IDVBDBService<DVBS2Service> {
     	repository.delete(service);
     }
 
-/*
 	@Bean
 	public ServletRegistrationBean h2servletRegistration() {
 	    ServletRegistrationBean registration = new ServletRegistrationBean(new WebServlet());
 	    registration.addUrlMappings("/console/*");
 	    return registration;
 	}
-*/
 }
