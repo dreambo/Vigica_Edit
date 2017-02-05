@@ -18,4 +18,6 @@ public interface IDVBDBService<T extends DVBService> {
 	public abstract void update_bdd(T service);
 
 	public abstract void delete_bdd(T service);
+
+	public abstract void deleteAll();
 }

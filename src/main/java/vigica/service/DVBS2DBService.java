@@ -15,7 +15,7 @@ import vigica.model.DVBS2Service;
 public class DVBS2DBService implements IDVBDBService<DVBS2Service> {
 
 	@Autowired
-    private DVBRepository<DVBS2Service> repository;
+    private DVBS2Repository repository;
 
     @Override
 	public List<DVBS2Service> read_bdd() {
@@ -48,9 +48,15 @@ public class DVBS2DBService implements IDVBDBService<DVBS2Service> {
     }
     
     @Override
-	public void delete_bdd (DVBS2Service service) {
+	public void delete_bdd(DVBS2Service service) {
 
     	repository.delete(service);
+    }
+
+    @Override
+	public void deleteAll() {
+
+    	repository.deleteAll();
     }
 
 	@Bean

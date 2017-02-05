@@ -296,6 +296,8 @@ public class FXMLMainController<T extends DVBService> implements Initializable {
             AbstractReader<T> reader;
 			serviceDataS2.clear();
 			serviceDataT2.clear();
+			serviceDBS2.deleteAll();
+			serviceDBT2.deleteAll();
 
 			if (dvbs2File != null) {
             	reader = getReader(dvbs2File);
@@ -403,8 +405,16 @@ public class FXMLMainController<T extends DVBService> implements Initializable {
 	@FXML
     private void filterAction(KeyEvent event) {
 
-    	// List<T> services = serviceDB.read_bdd(s_name.getText());
-        // serviceData.setAll(services);
+		if (tabPane.getSelectionModel().isSelected(0)) {
+			// DVB-S2
+	    	List<T> services = (List<T>) serviceDBS2.read_bdd(s_name.getText());
+	        serviceDataS2.setAll(services);
+
+		} else if (tabPane.getSelectionModel().isSelected(1)) {
+			// DVB-S2
+	    	List<T> services = (List<T>) serviceDBT2.read_bdd(s_name.getText());
+	        serviceDataT2.setAll(services);
+		}
     }
 
     private void handleTask(Service<List<T>> task, String zeTitle, String action) throws Exception {

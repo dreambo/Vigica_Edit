@@ -12,7 +12,7 @@ import vigica.model.DVBT2Service;
 public class DVBT2DBService implements IDVBDBService<DVBT2Service> {
 
 	@Autowired
-    private DVBRepository<DVBT2Service> repository;
+    private DVBT2Repository repository;
 
     @Override
 	public List<DVBT2Service> read_bdd() {
@@ -33,11 +33,11 @@ public class DVBT2DBService implements IDVBDBService<DVBT2Service> {
     }
     
     @Override
-	public void save_bdd (Collection<DVBT2Service> services)  {
+	public void save_bdd(Collection<DVBT2Service> services)  {
 
     	repository.save(services);
     }
-    
+
     @Override
 	public void update_bdd(DVBT2Service service)  {
 
@@ -45,11 +45,16 @@ public class DVBT2DBService implements IDVBDBService<DVBT2Service> {
     }
     
     @Override
-	public void delete_bdd (DVBT2Service service) {
+	public void delete_bdd(DVBT2Service service) {
 
     	repository.delete(service);
     }
 
+    @Override
+	public void deleteAll() {
+
+    	repository.deleteAll();
+    }
 /*
 	@Bean
 	public ServletRegistrationBean h2servletRegistration() {
