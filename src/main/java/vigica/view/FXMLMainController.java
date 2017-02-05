@@ -77,6 +77,9 @@ public class FXMLMainController<T extends DVBService> implements Initializable {
 	private static final String DTV_PREFS   = "dtv_preferences.xml";
 	private static final String CCCAM_CFG   = "Cccam.txt";
 
+	private static final String DVB_S2 = "DVB-S2";
+	private static final String DVB_T2 = "DVB-T2";
+
 	private File dvbs2File;
 	private File dvbt2File;
 	private File prefsFile;
@@ -287,12 +290,12 @@ public class FXMLMainController<T extends DVBService> implements Initializable {
 
         fileChooser.setTitle("Open Services File");
         fileChooser.setInitialDirectory(currentDir.exists() ? currentDir : null);
-        File file = fileChooser.showDialog(tabPane.getScene().getWindow()); // OpenDialog(serviceTable.getScene().getWindow());
+        File rootFolder = fileChooser.showDialog(tabPane.getScene().getWindow()); // OpenDialog(serviceTable.getScene().getWindow());
 
-        if (file != null) {
+        if (rootFolder != null) {
 
-            currentDir = file.getParentFile();
-            initFiles(file);
+            currentDir = rootFolder; // .getParentFile();
+            initFiles(rootFolder);
             AbstractReader<T> reader;
 			serviceDataS2.clear();
 			serviceDataT2.clear();
@@ -301,19 +304,19 @@ public class FXMLMainController<T extends DVBService> implements Initializable {
 
 			if (dvbs2File != null) {
             	reader = getReader(dvbs2File);
-	            handleTask((Service<List<T>>) reader, file.getName(), "Opening DVB-S2 file");
+	            handleTask((Service<List<T>>) reader, rootFolder.getName(), "Opening " + DVB_S2 + " file " + dvbs2File);
             }
 
             if (dvbt2File != null) {
 	            reader = getReader(dvbt2File);
-	            handleTask((Service<List<T>>) reader, file.getName(), "Opening DVB-T2 file");
+	            handleTask((Service<List<T>>) reader, rootFolder.getName(), "Opening " + DVB_T2 + " file " + dvbs2File);
             }
         }
     }
 
-    private void initFiles(File file) {
+    private void initFiles(File rootFolder) {
 
-    	File[] files = file.listFiles();
+    	File[] files = rootFolder.listFiles();
     	dvbs2File = dvbt2File = prefsFile = cccamFile = null;
 
     	for (File dtvFile: files) {
@@ -365,14 +368,14 @@ public class FXMLMainController<T extends DVBService> implements Initializable {
 
     	fileChooser.setTitle("Export Services");
 	    fileChooser.setInitialDirectory(currentDir.exists() ? currentDir : null);
-	    File file = fileChooser.showDialog(tabPane.getScene().getWindow()); // SaveDialog(serviceTable.getScene().getWindow());
+	    File rootFolder = fileChooser.showDialog(tabPane.getScene().getWindow()); // SaveDialog(serviceTable.getScene().getWindow());
 
-	    if (file != null) {
-	        currentDir = file.getParentFile();
+	    if (rootFolder != null) {
+	        currentDir = rootFolder; //.getParentFile();
 	        // save DVB-S2
-	        save(new File(file, DVB_S_MW_S1), serviceDataS2);
+	        save(new File(rootFolder, DVB_S_MW_S1), serviceDataS2);
 	        // save DVB-T2
-	        save(new File(file, DVB_T_MW_S1), serviceDataT2);
+	        save(new File(rootFolder, DVB_T_MW_S1), serviceDataT2);
 	    }
 	}
 
@@ -422,17 +425,17 @@ public class FXMLMainController<T extends DVBService> implements Initializable {
     	task.reset();
         pi.visibleProperty().bind(task.runningProperty());
         pi.progressProperty().bind(task.progressProperty());
-        task.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
 
+        task.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
 			@Override
             public void handle(WorkerStateEvent t) {
                 // print services into tableview
         		List<T> dvbServices = task.getValue();
         		if (dvbServices != null) {
-            		if (action.contains("DVB-S2")) {
+            		if (action.contains(DVB_S2)) {
                 		serviceDataS2.setAll(dvbServices);
             			serviceDVBS2Table.setItems(serviceDataS2);
-            		} else if (action.contains("DVB-T2")) {
+            		} else if (action.contains(DVB_T2)) {
                 		serviceDataT2.setAll(dvbServices);
                 		serviceDVBT2Table.setItems(serviceDataT2);
             		}
