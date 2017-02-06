@@ -1,62 +1,29 @@
-/*
- * Copyright (C) 2016 bnabi
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-package vigica.tools;
+package vigica.tools.writer;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javafx.concurrent.Service;
 import javafx.concurrent.Task;
-
-import org.springframework.stereotype.Component;
-
 import vigica.model.DVBService;
-import vigica.service.IDVBDBService;
+import vigica.service.DVBDBService;
+import vigica.tools.ByteUtils;
+import vigica.tools.CRC32_mpeg;
 
-/**
- *
- * @author bnabi
- */
-@Component
-public class Generate_mw_s1<T extends DVBService> extends DVBWriter<T> {
+public abstract class DVBWriter<T extends DVBService> extends Service<List<T>> {
 
-	// @Autowired
-    private IDVBDBService<T> bdd;
-	private File dvbFile;
-	private List<Byte> fileVersion = Arrays.asList((byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x0C); // file version 4 bytes
-
-	public Generate_mw_s1() {}
-
-	@Override
-    public void setDvbFile(File dvbFile) {
-    	this.dvbFile = dvbFile;
-    }
-
-	@Override
-    public void setFileVersion(List<Byte> fileVersion) {
-    	this.fileVersion = fileVersion;
-    }
+	public abstract File getDvbFile();
+    public abstract void setDvbFile(File dvbFile);
+	public abstract List<Byte> getFileVersion();
+	public abstract void setFileVersion(List<Byte> fileversion);
+	public abstract DVBDBService<T> getServiceDB();
 
 	/**
      * compress this list of dvb services into a the file dvbFile
      * @param chemin
      */
-	@Override
     public void compress(List<T> services) throws Exception {
 
     	List<Byte> satservices = new ArrayList<>();
@@ -64,12 +31,12 @@ public class Generate_mw_s1<T extends DVBService> extends DVBWriter<T> {
 
         for (T service : services) {
             if (!service.getFlag()) {
-                sdata = ByteUtils.hexStringToBytes(service.getLine());
+                sdata = ByteUtils.base64Decoder(service.getLine()); // ByteUtils.hexStringToBytes(service.getLine());
                 satservices.addAll(sdata);
 
             } else {
 
-            	sdata = ByteUtils.hexStringToBytes(service.getLine());
+            	sdata = ByteUtils.base64Decoder(service.getLine()); // ByteUtils.hexStringToBytes(service.getLine());
                 int entryLength = sdata.size();
                 List<Byte> prefs = getPpr(service.getPpr());
                 sdata.set(entryLength - 10, prefs.get(0));
@@ -102,7 +69,7 @@ public class Generate_mw_s1<T extends DVBService> extends DVBWriter<T> {
         List<Byte> servicesCount = Arrays.asList(ByteUtils.int2ba(services.size())); // 4 bytes
         List<Byte> servicesData  = new ArrayList<>();
 
-        servicesData.addAll(fileVersion);
+        servicesData.addAll(getFileVersion());
         servicesData.addAll(servicesCount);
         servicesData.addAll(satservices);
 
@@ -121,7 +88,7 @@ public class Generate_mw_s1<T extends DVBService> extends DVBWriter<T> {
         mw_s1.addAll(crcbyte);
         mw_s1.addAll(servicesData);
 
-        ByteUtils.writeBytesToFile(mw_s1, dvbFile);
+        ByteUtils.writeBytesToFile(mw_s1, getDvbFile());
     }
 
     private List<Byte> getPpr(String preference) {
@@ -154,7 +121,7 @@ public class Generate_mw_s1<T extends DVBService> extends DVBWriter<T> {
 			@Override
 			protected List<T> call() throws Exception {
 	            updateProgress(-1, 0);
-	            compress(bdd.read_bdd());
+	            compress(getServiceDB().read_bdd());
 	            updateProgress(1, 1);
 
 	            return null;

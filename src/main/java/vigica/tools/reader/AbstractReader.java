@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package vigica.tools;
+package vigica.tools.reader;
 
 import java.io.File;
 import java.nio.ByteBuffer;
@@ -28,41 +28,36 @@ import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 
 import org.apache.log4j.Logger;
-import org.springframework.stereotype.Component;
 
 import vigica.model.DVBService;
-import vigica.service.IDVBDBService;
+import vigica.service.DVBDBService;
+import vigica.tools.ByteUtils;
 import vigica.view.Message;
 
-/**
- * Util class for file decomposition
- * 
- * @author nabillo
- */
-@Component
-public class Decompress_mw_s1<T extends DVBService> extends Service<List<T>> implements DVBReader<T> {
+public abstract class AbstractReader<T extends DVBService> extends Service<List<T>> {
 
-	private static final Logger LOG = Logger.getLogger(Decompress_mw_s1.class);
-	// private static final byte[] END_MAGIC = {(byte) 0x00, (byte) 0x00, (byte) 0x3F, (byte) 0xFF};
-	private static final byte[] END_MAGIC = {(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x00};
+	private static final Logger LOG = Logger.getLogger(AbstractReader.class);
 
     private File dvbFile;
     private List<Byte> fileVersion;
 
     // @Autowired
-    private IDVBDBService<T> bdd;
+    private DVBDBService<T> bdd;
 
-    @Override
+    public AbstractReader() {}
+
+	public void setServiceDB(DVBDBService<T> bdd) {
+        this.bdd = bdd;
+    }
+
 	public void setDvbFile(File dvbFile) {
         this.dvbFile = dvbFile;
     }
 
-    @Override
     public List<Byte> getFileVersion() {
     	return fileVersion;
     }
 
-    @Override
 	public List<T> decompress() throws Exception {
 
     	byte[] bindata;
@@ -83,11 +78,15 @@ public class Decompress_mw_s1<T extends DVBService> extends Service<List<T>> imp
         int recd_nmbr_d = ByteBuffer.wrap(recd_nmbr_s).getInt();
         int recd_idx = 0;
         int bind_idx = 16;
-        // int offset = (fileVersion.get(3) == 0x0E ? (4*16 + 2) : 0);
-        int offset = (fileVersion.get(3) == 0x0E ? (4*16 + 3) : 0);
+        int offset = getOffset(fileVersion.get(3));
 
-        while (recd_idx < recd_nmbr_d) try {
-            int nxt_idx = ByteUtils.find_end(bindata, bind_idx, END_MAGIC);
+        while (recd_idx < recd_nmbr_d) {
+            int nxt_idx = ByteUtils.find_end(bindata, bind_idx, getEndMagic());
+            if (nxt_idx < 0) {
+            	LOG.error("Can not find magic end " + getEndMagic());
+            	return services;
+            }
+
             byte[] entry = Arrays.copyOfRange(bindata, bind_idx, nxt_idx + offset);
             int entryLength = nxt_idx - bind_idx;
             // create record file name
@@ -108,20 +107,24 @@ public class Decompress_mw_s1<T extends DVBService> extends Service<List<T>> imp
 
             // add the network number and preference setting to the end of the file name
             String rcdname_s = new String(entryName, "UTF-8");
-            String binrcd_s = ByteUtils.bytesToHexString(entry);
+            String binrcd_s = ByteUtils.base64Encoder(entry);
             // String asciiname = stype + "~" + recd_idx + "~" + rcdname_s + "~E0~" + "N" + nid_d + "~" + "P" + ppr_s;
-            T service = (T) new DVBService(stype, ++recd_idx, rcdname_s, nid_d, ppr_s, binrcd_s, false, "");
+            T service = getDVBService(stype, ++recd_idx, rcdname_s, nid_d, ppr_s, binrcd_s, false, "");
+
             services.add(service);
             bind_idx = nxt_idx + offset;
-
-        } catch (Exception e) {
-            throw new Exception(e.getCause().getMessage());
         }
 
         return services;
     }
 
-    private String getPreference(byte[] ppr) {
+	protected abstract T getDVBService(String stype, int i, String rcdname_s, int nid_d, String ppr_s, String binrcd_s, boolean b, String string);
+
+	protected abstract int getOffset(byte version);
+
+	protected abstract byte[] getEndMagic();
+
+	private String getPreference(byte[] ppr) {
         String ppr_s ="";
         Boolean isFirst = true;
 

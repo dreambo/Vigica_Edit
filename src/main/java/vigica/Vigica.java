@@ -90,6 +90,14 @@ public class Vigica extends Application {
             Scene scene = new Scene(rootLayout);
             primaryStage.setScene(scene);
             primaryStage.setResizable(false);
+
+            // set scss style
+            /*
+            String css = getClass().getResource("/myStyle.css").toExternalForm();
+            scene.getStylesheets().clear();
+            scene.getStylesheets().add(css);
+            */
+
             primaryStage.show();
 
         } catch (Exception e) {

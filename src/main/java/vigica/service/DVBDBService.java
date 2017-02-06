@@ -5,7 +5,7 @@ import java.util.List;
 
 import vigica.model.DVBService;
 
-public interface IDVBDBService<T extends DVBService> {
+public interface DVBDBService<T extends DVBService> {
 
 	public abstract List<T> read_bdd();
 

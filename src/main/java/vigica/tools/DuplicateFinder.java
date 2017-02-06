@@ -27,7 +27,7 @@ import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import vigica.model.DVBService;
-import vigica.service.IDVBDBService;
+import vigica.service.DVBDBService;
 
 /**
  * Util class for file decomposition
@@ -35,33 +35,41 @@ import vigica.service.IDVBDBService;
  * @author nabillo
  */
 @Component
-public class DuplicateFinder extends Service<List<DVBService>> {
+public class DuplicateFinder<T extends DVBService> extends Service<List<T>> {
 
 	private static final Logger LOG = Logger.getLogger(DuplicateFinder.class);
 
-    // @Autowired
-    private IDVBDBService<DVBService> bdd;
-    private ObservableList<DVBService> services;
+    private DVBDBService<T> bdd;
+
+    public DVBDBService<T> getBdd() {
+		return bdd;
+	}
+
+	public void setBdd(DVBDBService<T> bdd) {
+		this.bdd = bdd;
+	}
+
+	private ObservableList<T> services;
 
     public DuplicateFinder() {}
 
-	public void setServices(ObservableList<DVBService> services) {
+	public void setServices(ObservableList<T> services) {
         this.services = services;
     }
 
 	@Override
-	protected Task<List<DVBService>> createTask() {
-		
-		return new Task<List<DVBService>>() {
+	protected Task<List<T>> createTask() {
+
+		return new Task<List<T>>() {
 			@Override
-			protected List<DVBService> call() throws Exception {
-	            List<DVBService> servicesUnique = new ArrayList<>();
+			protected List<T> call() throws Exception {
+	            List<T> servicesUnique = new ArrayList<>();
 
 	            updateProgress(-1, 0);
 	            List<String> uniqueIds = new ArrayList<>();
 	            int i = 0;
 
-	            for (DVBService service: services) {
+	            for (T service: services) {
 	                if (uniqueIds.contains(service.getName()) && service.getPpr().isEmpty()) {
 	                	LOG.info("Service " + service + " duplicated!");
 	                } else {

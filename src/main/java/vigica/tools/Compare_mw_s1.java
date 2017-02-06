@@ -34,7 +34,8 @@ import org.springframework.stereotype.Component;
 
 import vigica.Vigica;
 import vigica.model.DVBService;
-import vigica.service.IDVBDBService;
+import vigica.service.DVBDBService;
+import vigica.tools.reader.DVBReader;
 import vigica.view.FXMLCompareController;
 
 /**
@@ -50,7 +51,7 @@ public class Compare_mw_s1<T extends DVBService> extends Service<List<T>> {
     // @Autowired
     private DVBReader<T> reader;
     // @Autowired
-    private IDVBDBService<T> bdd;
+    private DVBDBService<T> bdd;
     // @Autowired
     private FXMLCompareController<T> compareController;
 

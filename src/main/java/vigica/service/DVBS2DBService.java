@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import vigica.model.DVBS2Service;
 
 @Service
-public class DVBS2DBService implements IDVBDBService<DVBS2Service> {
+public class DVBS2DBService implements DVBDBService<DVBS2Service> {
 
 	@Autowired
     private DVBS2Repository repository;

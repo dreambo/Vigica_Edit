@@ -1,4 +1,4 @@
-package vigica.tools;
+package vigica.tools.reader;
 
 import java.io.File;
 import java.util.List;

@@ -6,6 +6,8 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
+import java.util.Iterator;
 import java.util.List;
 
 public class ByteUtils {
@@ -16,6 +18,20 @@ public class ByteUtils {
             builder.append(String.format("%02x", b));
         }
         return builder.toString();
+    }
+
+    public static String base64Encoder(byte[] in) {
+        return Base64.getEncoder().encodeToString(in);
+    }
+
+    public static List<Byte> base64Decoder(String s) {
+    	List<Byte> bytesList = new ArrayList<>();
+        byte[] bytes = Base64.getDecoder().decode(s);
+        for (byte myByte: bytes) {
+        	bytesList.add(myByte);
+        }
+
+        return bytesList;
     }
 
     public static int find_end(byte[] bindata, int strt, byte[] endMagic) {

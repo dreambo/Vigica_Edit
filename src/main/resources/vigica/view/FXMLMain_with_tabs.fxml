@@ -13,13 +13,17 @@
 
 <AnchorPane id="AnchorPane" prefHeight="910.0" prefWidth="1130.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="vigica.view.FXMLMainController">
     <children>
-      <Button fx:id="openButton" onAction="#openAction" prefHeight="31.0" prefWidth="125.0" text="Open" textAlignment="CENTER" />
-      <Button fx:id="saveButton" layoutX="140.0" onAction="#saveAction" prefHeight="31.0" prefWidth="125.0" text="Save" textAlignment="CENTER">
+      <Button fx:id="openButton" onAction="#openAction" prefHeight="31.0" prefWidth="125.0" text="Open" textAlignment="CENTER">
+      	<tooltip><Tooltip text="Open the DTV backup folder" /></tooltip>
+      </Button>
+      <Button fx:id="saveButton" layoutX="210.0" onAction="#saveAction" prefHeight="31.0" prefWidth="125.0" text="Save" textAlignment="CENTER">
       	<tooltip><Tooltip text="Save to an other file" /></tooltip>
       </Button>
+      <!--
       <Button fx:id="compareButton" layoutX="280.0" onAction="#compareAction" prefHeight="31.0" prefWidth="125.0" text="Compare" textAlignment="CENTER">
       	<tooltip><Tooltip text="Compare with an other file" /></tooltip>
       </Button>
+      -->
       <Button fx:id="duplicateButton" layoutX="414.0" onAction="#duplicateAction" prefHeight="31.0" prefWidth="125.0" text="Duplicate" textAlignment="CENTER">
       	<tooltip><Tooltip text="Remove duplicated entries" /></tooltip>
       </Button>

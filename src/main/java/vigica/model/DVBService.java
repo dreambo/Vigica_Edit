@@ -126,7 +126,7 @@ public class DVBService {
         return ppr;
     }
     
-    @Column(length=1024)
+    @Column(length=600)
     public String getLine() {
         return line.get();
     }

@@ -53,16 +53,18 @@ import javafx.scene.input.KeyEvent;
 import javafx.stage.DirectoryChooser;
 import javafx.util.Callback;
 import vigica.model.DVBService;
+import vigica.service.DVBDBService;
 import vigica.service.DVBS2DBService;
 import vigica.service.DVBT2DBService;
-import vigica.service.IDVBDBService;
-import vigica.tools.AbstractReader;
 import vigica.tools.ByteUtils;
 import vigica.tools.Compare_mw_s1;
-import vigica.tools.DVBS2Reader;
-import vigica.tools.DVBT2Reader;
-import vigica.tools.DVBWriter;
 import vigica.tools.DuplicateFinder;
+import vigica.tools.reader.AbstractReader;
+import vigica.tools.reader.DVBS2Reader;
+import vigica.tools.reader.DVBT2Reader;
+import vigica.tools.writer.DVBS2Writer;
+import vigica.tools.writer.DVBT2Writer;
+import vigica.tools.writer.DVBWriter;
 
 /**
  *
@@ -94,12 +96,15 @@ public class FXMLMainController<T extends DVBService> implements Initializable {
     DVBS2DBService serviceDBS2;
     @Autowired
     DVBT2DBService serviceDBT2;
+    DVBWriter<T> writer;
     @Autowired
-    DVBWriter<T> generate;
+    DVBS2Writer dvbs2Writer;
+    @Autowired
+    DVBT2Writer dvbt2Writer;
     @Autowired
     Compare_mw_s1<T> compare;
     @Autowired
-    DuplicateFinder duplicate;
+    DuplicateFinder<T> duplicate;
 
     // test
     @Autowired
@@ -154,8 +159,8 @@ public class FXMLMainController<T extends DVBService> implements Initializable {
     private Button openButton;
     @FXML
     private Button saveButton;
-    @FXML
-    private Button compareButton;
+    // @FXML
+    // private Button compareButton;
     @FXML
     private Button duplicateButton;
 
@@ -170,7 +175,7 @@ public class FXMLMainController<T extends DVBService> implements Initializable {
      */
     public FXMLMainController() {}
 
-    public void init(ObservableList<T> serviceData, IDVBDBService<T> serviceDB, TableView<T> table, TableColumn<T, Integer> idx, TableColumn<T, String> name, TableColumn<T, String> type, TableColumn<T, Integer> nid, TableColumn<T, String> ppr, TableColumn<T, String> newCol) {
+    public void init(ObservableList<T> serviceData, DVBDBService<T> serviceDB, TableView<T> table, TableColumn<T, Integer> idx, TableColumn<T, String> name, TableColumn<T, String> type, TableColumn<T, Integer> nid, TableColumn<T, String> ppr, TableColumn<T, String> newCol) {
 
         table.setEditable(true);
         idx.setCellValueFactory(cellData -> cellData.getValue().idxProperty().asObject());
@@ -280,8 +285,8 @@ public class FXMLMainController<T extends DVBService> implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
 
         pi.setVisible(false);
-        init(serviceDataS2, (IDVBDBService<T>) serviceDBS2, serviceDVBS2Table, s_idxColumnS2, s_nameColumnS2, s_typeColumnS2, s_nidColumnS2, s_pprColumnS2, s_newColumnS2);
-        init(serviceDataT2, (IDVBDBService<T>) serviceDBT2, serviceDVBT2Table, s_idxColumnT2, s_nameColumnT2, s_typeColumnT2, s_nidColumnT2, s_pprColumnT2, s_newColumnT2);
+        init(serviceDataS2, (DVBDBService<T>) serviceDBS2, serviceDVBS2Table, s_idxColumnS2, s_nameColumnS2, s_typeColumnS2, s_nidColumnS2, s_pprColumnS2, s_newColumnS2);
+        init(serviceDataT2, (DVBDBService<T>) serviceDBT2, serviceDVBT2Table, s_idxColumnT2, s_nameColumnT2, s_typeColumnT2, s_nidColumnT2, s_pprColumnT2, s_newColumnT2);
         enableComponents(false);
     }
 
@@ -339,12 +344,12 @@ public class FXMLMainController<T extends DVBService> implements Initializable {
 
     	if (fileName.toLowerCase().startsWith(DVB_S_MW_S1)) {
     		reader = (AbstractReader<T>) dvbs2reader;
-    		reader.setServiceDB((IDVBDBService<T>) serviceDBS2);
+    		reader.setServiceDB((DVBDBService<T>) serviceDBS2);
     		reader.setDvbFile(dvbFile);
 
     	} else if (fileName.toLowerCase().startsWith(DVB_T_MW_S1)) {
     		reader = (AbstractReader<T>) dvbt2reader;
-    		reader.setServiceDB((IDVBDBService<T>) serviceDBT2);
+    		reader.setServiceDB((DVBDBService<T>) serviceDBT2);
     		reader.setDvbFile(dvbFile);
     	}
 
@@ -358,9 +363,9 @@ public class FXMLMainController<T extends DVBService> implements Initializable {
 	        return;
 	    }
 
-        generate.setDvbFile(dvbFile);
-        generate.setFileVersion(getReader(dvbFile).getFileVersion());
-        handleTask(generate, dvbFile.getName(), "Save services " + dvbFile.getName());
+        writer.setDvbFile(dvbFile);
+        writer.setFileVersion(getReader(dvbFile).getFileVersion());
+        handleTask(writer, dvbFile.getName(), "Save services " + dvbFile.getName());
 	}
 
 	@FXML
@@ -373,12 +378,18 @@ public class FXMLMainController<T extends DVBService> implements Initializable {
 	    if (rootFolder != null) {
 	        currentDir = rootFolder; //.getParentFile();
 	        // save DVB-S2
-	        save(new File(rootFolder, DVB_S_MW_S1), serviceDataS2);
+			if (dvbs2File != null) {
+				writer = (DVBWriter<T>) dvbs2Writer;
+				save(new File(rootFolder, DVB_S_MW_S1), serviceDataS2);
+			}
 	        // save DVB-T2
-	        save(new File(rootFolder, DVB_T_MW_S1), serviceDataT2);
+			if (dvbt2File != null) {
+				writer = (DVBWriter<T>) dvbt2Writer;
+				save(new File(rootFolder, DVB_T_MW_S1), serviceDataT2);
+			}
 	    }
 	}
-
+/*
 	@FXML
     private void compareAction(ActionEvent event) throws Exception {
 
@@ -396,13 +407,28 @@ public class FXMLMainController<T extends DVBService> implements Initializable {
             handleTask(compare, null, "Compare files");
         }
     }
-
+*/
     @FXML
 	private void duplicateAction(ActionEvent event) throws Exception {
 /*
     	duplicate.setServices(serviceData);
 		handleTask(event, duplicate, null, "Remove duplicate");
 */
+    	String action = "Remove duplicate services ";
+		if (tabPane.getSelectionModel().isSelected(0)) {
+			// DVB-S2
+			duplicate.setServices((ObservableList<T>) serviceDataS2);
+	        duplicate.setBdd((DVBDBService<T>) serviceDBS2);
+	        action += DVB_S2;
+
+		} else if (tabPane.getSelectionModel().isSelected(1)) {
+			// DVB-T2
+			duplicate.setServices((ObservableList<T>) serviceDataT2);
+	        duplicate.setBdd((DVBDBService<T>) serviceDBT2);
+	        action += DVB_T2;
+		}
+
+		handleTask(duplicate, null, action);
 	}
 
 	@FXML
@@ -414,7 +440,7 @@ public class FXMLMainController<T extends DVBService> implements Initializable {
 	        serviceDataS2.setAll(services);
 
 		} else if (tabPane.getSelectionModel().isSelected(1)) {
-			// DVB-S2
+			// DVB-T2
 	    	List<T> services = (List<T>) serviceDBT2.read_bdd(s_name.getText());
 	        serviceDataT2.setAll(services);
 		}
@@ -422,7 +448,6 @@ public class FXMLMainController<T extends DVBService> implements Initializable {
 
     private void handleTask(Service<List<T>> task, String zeTitle, String action) throws Exception {
 
-    	task.reset();
         pi.visibleProperty().bind(task.runningProperty());
         pi.progressProperty().bind(task.progressProperty());
 
@@ -453,7 +478,10 @@ public class FXMLMainController<T extends DVBService> implements Initializable {
             }
         });
 
-        task.start();
+    	if (!task.isRunning()) {
+    		task.reset();
+    		task.start();
+    	}
     }
 
     class EditingCell extends TableCell<T, String> {
@@ -525,7 +553,7 @@ public class FXMLMainController<T extends DVBService> implements Initializable {
         s_name.setDisable(!enable);
         s_name.clear();
         saveButton.setDisable(!enable);
-        compareButton.setDisable(!enable);
+        // compareButton.setDisable(!enable);
         duplicateButton.setDisable(!enable);
 	}
 }
