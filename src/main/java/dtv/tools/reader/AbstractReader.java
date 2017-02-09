@@ -29,10 +29,10 @@ import javafx.concurrent.Task;
 
 import org.apache.log4j.Logger;
 
+import dtv.controller.Message;
 import dtv.database.DVBDBService;
 import dtv.model.DVBChannel;
 import dtv.tools.ByteUtils;
-import dtv.view.Message;
 
 public abstract class AbstractReader<T extends DVBChannel> extends Service<List<T>> {
 

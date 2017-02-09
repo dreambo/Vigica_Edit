@@ -45,9 +45,12 @@ public class Vigica extends Application {
 	private static final Logger LOG = Logger.getLogger(Vigica.class);
 
 	private static String[] args;
-
-    private Stage primaryStage;
 	private static ConfigurableApplicationContext applicationContext;
+
+    public static void main(String[] args) {
+
+    	launch(Vigica.class, Vigica.args = args);
+    }
 
 	@Override
 	public void init() throws Exception {
@@ -66,70 +69,23 @@ public class Vigica extends Application {
 
 		notifyPreloader(new Preloader.StateChangeNotification(Preloader.StateChangeNotification.Type.BEFORE_START));
 
-    	this.primaryStage = primaryStage;
-        this.primaryStage.setTitle("Vigica Edit");
-        this.primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/app_icon.png")));
+        primaryStage.setTitle("Vigica Edit");
+        primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/app_icon.png")));
 
-        showServiceOverview(initRootLayout());
-        
-        this.primaryStage.setOnCloseRequest(e -> Platform.exit());
-    }
+        AnchorPane mainView = (AnchorPane) load("/dtv/view/FXMLMain.fxml");
 
-    /**
-     * Initializes the root layout.
-     */
-    public AnchorPane initRootLayout() {
-
-    	AnchorPane rootLayout = null;
-
-    	try {
-            // Load root layout from fxml file.
-        	rootLayout = (AnchorPane) load("/dtv/view/RootLayout.fxml");
-
-            // Show the scene containing the root layout.
-            Scene scene = new Scene(rootLayout);
-            primaryStage.setScene(scene);
-            primaryStage.setResizable(false);
-
-            // set scss style
-            /*
-            String css = getClass().getResource("/myStyle.css").toExternalForm();
-            scene.getStylesheets().clear();
-            scene.getStylesheets().add(css);
-            */
-
-            primaryStage.show();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return rootLayout;
-    }
-
-    /**
-     * Shows the service overview inside the root layout.
-     */
-    public void showServiceOverview(AnchorPane rootLayout) {
-        try {
-            // Load main view.
-            // AnchorPane serviceOverview = (AnchorPane) load("/dtv/view/FXMLMain.fxml"); // FXMLMain_with_tabs.fxml
-        	AnchorPane serviceOverview = (AnchorPane) load("/dtv/view/FXMLMain.fxml");
-
-            // Set service overview into the center of root layout.
-            rootLayout.getChildren().add(serviceOverview);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-    
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-
-    	launch(Vigica.class, Vigica.args = args);
+        // Show the scene containing the root layout.
+        Scene scene = new Scene(mainView);
+        primaryStage.setScene(scene);
+        primaryStage.setResizable(false);
+        primaryStage.setOnCloseRequest(e -> Platform.exit());
+        // set scss style
+        /*
+        String css = getClass().getResource("/myStyle.css").toExternalForm();
+        scene.getStylesheets().clear();
+        scene.getStylesheets().add(css);
+        */
+        primaryStage.show();
     }
 
     public static Object load(String url) {

@@ -33,10 +33,10 @@ import javafx.stage.StageStyle;
 import org.springframework.stereotype.Component;
 
 import dtv.Vigica;
+import dtv.controller.FXMLCompareController;
 import dtv.database.DVBDBService;
 import dtv.model.DVBChannel;
 import dtv.tools.reader.DVBReader;
-import dtv.view.FXMLCompareController;
 
 /**
  *

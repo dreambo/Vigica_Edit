@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dtv.view;
+package dtv.controller;
 
 import java.io.File;
 import java.net.URL;
@@ -288,7 +288,7 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
         pi.setVisible(false);
         init(serviceDataS2, (DVBDBService<T>) serviceDBS2, serviceDVBS2Table, s_idxColumnS2, s_nameColumnS2, s_typeColumnS2, s_pprColumnS2);
         init(serviceDataT2, (DVBDBService<T>) serviceDBT2, serviceDVBT2Table, s_idxColumnT2, s_nameColumnT2, s_typeColumnT2, s_pprColumnT2);
-        enableComponents(false);
+        disableComponents(true);
     }
 
     @FXML
@@ -311,11 +311,13 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
 			if (dvbs2File != null) {
             	reader = getReader(dvbs2File);
 	            handleTask((Service<List<T>>) reader, rootFolder.getName(), "Opening " + DVB_S2 + " file " + dvbs2File);
+	            tabPane.getSelectionModel().select(0);
             }
 
             if (dvbt2File != null) {
 	            reader = getReader(dvbt2File);
 	            handleTask((Service<List<T>>) reader, rootFolder.getName(), "Opening " + DVB_T2 + " file " + dvbs2File);
+	            tabPane.getSelectionModel().select(1);
             }
         }
     }
@@ -485,7 +487,7 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
             	}
 
                 if (zeTitle != null) title.setText(zeTitle);
-                enableComponents(true);
+                disableComponents(false);
             }
         });
 
@@ -567,11 +569,12 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
         }
     }
 
-    private void enableComponents(boolean enable) {
-        s_name.setDisable(!enable);
+    private void disableComponents(boolean disable) {
+        s_name.setDisable(disable);
         s_name.clear();
-        saveButton.setDisable(!enable);
-        sortButton.setDisable(!enable);
-        duplicateButton.setDisable(!enable);
+        saveButton.setDisable(disable);
+        sortButton.setDisable(disable);
+        duplicateButton.setDisable(disable);
+        tabPane.setDisable(disable);
 	}
 }

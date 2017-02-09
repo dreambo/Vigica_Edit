@@ -11,7 +11,7 @@
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane id="AnchorPane" prefHeight="910.0" prefWidth="1130.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dtv.view.FXMLMainController">
+<AnchorPane id="AnchorPane" prefHeight="733.0" prefWidth="909.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dtv.controller.FXMLMainController">
     <children>
       <Button fx:id="openButton" onAction="#openAction" prefHeight="31.0" prefWidth="125.0" text="Open" textAlignment="CENTER">
       	<tooltip><Tooltip text="Open the DTV backup folder" /></tooltip>
@@ -26,21 +26,19 @@
       	<tooltip><Tooltip text="Remove duplicated entries" /></tooltip>
       </Button>
       <TextField fx:id="s_name" layoutX="193.0" layoutY="35.0" onKeyReleased="#filterAction" prefHeight="31.0" prefWidth="350.0" promptText="Name filter" />
-      <ProgressBar fx:id="pi" layoutX="553.0" layoutY="6.0" prefHeight="23.0" prefWidth="550.0" progress="0.0" />
-      <Label fx:id="title" layoutX="703.0" layoutY="39.0" prefHeight="23.0" prefWidth="375.0" textFill="#000000b6" />
+      <ProgressBar fx:id="pi" layoutX="553.0" layoutY="6.0" prefHeight="23.0" prefWidth="350.0" progress="0.0" />
+      <Label fx:id="title" layoutX="555.0" layoutY="39.0" prefHeight="23.0" prefWidth="350.0" textFill="#000000b6" />
 
-      <TabPane fx:id="tabPane" layoutX="14.0" layoutY="73.0" prefHeight="601.0" prefWidth="636.0" tabClosingPolicy="UNAVAILABLE">
+      <TabPane fx:id="tabPane" layoutX="6.0" layoutY="73.0" prefHeight="655.0" prefWidth="897.0" tabClosingPolicy="UNAVAILABLE">
         <tabs>
           <Tab text="DVB-S2">
                <content>
-                  <TableView fx:id="serviceDVBS2Table" prefHeight="769.0" prefWidth="1024.0">
+                  <TableView fx:id="serviceDVBS2Table" prefHeight="626.0" prefWidth="850.0">
                      <columns>
-                        <TableColumn fx:id="s_idxColumnS2" prefWidth="70.0" text="ID" />
-                        <TableColumn fx:id="s_typeColumnS2" prefWidth="70.0" text="Type" />
-                        <!--<TableColumn fx:id="s_nidColumnS2" prefWidth="65.0" text="NID" />-->
+                        <TableColumn fx:id="s_idxColumnS2" prefWidth="90.0" text="ID" />
+                        <TableColumn fx:id="s_typeColumnS2" prefWidth="90.0" text="Type" />
                         <TableColumn fx:id="s_nameColumnS2" minWidth="0.0" prefWidth="240.0" text="Name" />
-                        <TableColumn fx:id="s_pprColumnS2" maxWidth="334.0" minWidth="0.0" prefWidth="240.0" text="Preference" />
-                        <!--<TableColumn fx:id="s_newColumnS2" prefWidth="86.0" text="New" />-->
+                        <TableColumn fx:id="s_pprColumnS2" maxWidth="480.0" minWidth="0.0" prefWidth="470.0" text="Preference" />
                      </columns>
                   </TableView>
                </content>
@@ -49,12 +47,10 @@
                <content>
                   <TableView fx:id="serviceDVBT2Table" prefHeight="769.0" prefWidth="1024.0">
                      <columns>
-                        <TableColumn fx:id="s_idxColumnT2" prefWidth="70.0" text="ID" />
-                        <TableColumn fx:id="s_typeColumnT2" prefWidth="70.0" text="Type" />
-                        <!--<TableColumn fx:id="s_nidColumnT2" prefWidth="65.0" text="NID" />-->
+                        <TableColumn fx:id="s_idxColumnT2" prefWidth="90.0" text="ID" />
+                        <TableColumn fx:id="s_typeColumnT2" prefWidth="90.0" text="Type" />
                         <TableColumn fx:id="s_nameColumnT2" minWidth="0.0" prefWidth="240.0" text="Name" />
-                        <TableColumn fx:id="s_pprColumnT2" maxWidth="334.0" minWidth="0.0" prefWidth="240.0" text="Preference" />
-                        <!--<TableColumn fx:id="s_newColumnT2" prefWidth="86.0" text="New" />-->
+                        <TableColumn fx:id="s_pprColumnT2" maxWidth="480.0" minWidth="0.0" prefWidth="470.0" text="Preference" />
                      </columns>
                   </TableView>
                </content>
