@@ -9,7 +9,6 @@ import java.util.List;
 import dtv.database.DVBDBService;
 import dtv.model.DVBChannel;
 import dtv.tools.ByteUtils;
-import dtv.tools.CRC32_mpeg;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 
@@ -36,11 +35,11 @@ public abstract class DVBWriter<T extends DVBChannel> extends Service<List<T>> {
 
         for (T service : services) {
 
-        	// last to byte must be the channel index, beginning from 0
+        	// last two bytes must be the channel index, beginning from 0
             Byte[] indexBa = ByteUtils.int2ba(index++);
             sdata = ByteUtils.base64Decoder(service.getLine()); // ByteUtils.hexStringToBytes(service.getLine());
-            sdata.set(sdata.size() - 1, indexBa[3]);
-            sdata.set(sdata.size() - 2, indexBa[2]);
+            sdata.set(sdata.size() - 1, indexBa[indexBa.length - 1]);
+            sdata.set(sdata.size() - 2, indexBa[indexBa.length - 2]);
 
             if (!service.getFlag()) {
                 satservices.addAll(sdata);
@@ -84,11 +83,8 @@ public abstract class DVBWriter<T extends DVBChannel> extends Service<List<T>> {
         servicesData.addAll(servicesCount);
         servicesData.addAll(satservices);
 
-        //CRC32 crc = new CRC32();
-        CRC32_mpeg crc = new CRC32_mpeg();
-        servicesData.forEach(crc::update);
-
-        String crcresult = crc.getValue();
+        //CRC32
+        String crcresult = ByteUtils.crc32Mpeg(servicesData);
         crcresult = ("00000000" + crcresult).substring(crcresult.length());
         List<Byte> crcbyte = ByteUtils.hexStringToBytes(crcresult);
         

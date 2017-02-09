@@ -7,7 +7,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.Iterator;
 import java.util.List;
 
 public class ByteUtils {
@@ -156,5 +155,33 @@ public class ByteUtils {
         }
 
         servicesf.close();
+    }
+
+    public static String crc32Mpeg(List<Byte> bytes) {
+
+    	int register = 0xffffffff;
+
+    	for (Byte value: bytes) {
+            // Create a mask to isolate the highest bit.
+            int bitMask = (int) (1 << 31);
+
+            byte element = (byte) value;
+
+            register ^= ((int) element << 24);
+            for (int i = 0; i < 8; i++) {
+                if ((register & bitMask) != 0) {
+                    register = (int) ((register << 1) ^ 0x04c11db7);
+                } else {
+                    register <<= 1;
+                }
+            }
+		}
+
+    	// XOR the final register value.
+        register ^= 0x00000000;
+        // Create a mask to isolate only the correct width of bits.
+        long fullMask = (((1L << 31) - 1L) << 1) | 1L;
+
+        return Long.toHexString(register & fullMask);
     }
 }

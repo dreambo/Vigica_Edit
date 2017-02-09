@@ -29,7 +29,6 @@ import dtv.database.DVBS2DBService;
 import dtv.database.DVBT2DBService;
 import dtv.model.DVBChannel;
 import dtv.tools.ByteUtils;
-import dtv.tools.Compare_mw_s1;
 import dtv.tools.DuplicateFinder;
 import dtv.tools.reader.AbstractReader;
 import dtv.tools.reader.DVBS2Reader;
@@ -102,8 +101,6 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
     DVBS2Writer dvbs2Writer;
     @Autowired
     DVBT2Writer dvbt2Writer;
-    @Autowired
-    Compare_mw_s1<T> compare;
     @Autowired
     DuplicateFinder<T> duplicate;
 
