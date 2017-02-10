@@ -64,7 +64,7 @@ public class Vigica extends Application {
 		applicationContext.close();
 	}
 
-    @Override
+	@Override
     public void start(Stage primaryStage) throws Exception {
 
 		notifyPreloader(new Preloader.StateChangeNotification(Preloader.StateChangeNotification.Type.BEFORE_START));

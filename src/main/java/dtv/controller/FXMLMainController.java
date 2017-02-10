@@ -20,29 +20,14 @@ import java.io.File;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.function.Predicate;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import dtv.database.DVBDBService;
-import dtv.database.DVBS2DBService;
-import dtv.database.DVBT2DBService;
-import dtv.model.DVBChannel;
-import dtv.tools.ByteUtils;
-import dtv.tools.DuplicateFinder;
-import dtv.tools.reader.AbstractReader;
-import dtv.tools.reader.DVBS2Reader;
-import dtv.tools.reader.DVBT2Reader;
-import dtv.tools.writer.DVBS2Writer;
-import dtv.tools.writer.DVBT2Writer;
-import dtv.tools.writer.DVBWriter;
 import javafx.beans.binding.Bindings;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.concurrent.Service;
-import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -64,7 +49,22 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.DirectoryChooser;
-import javafx.util.Callback;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import dtv.database.DVBDBService;
+import dtv.database.DVBS2DBService;
+import dtv.database.DVBT2DBService;
+import dtv.model.DVBChannel;
+import dtv.tools.ByteUtils;
+import dtv.tools.DuplicateFinder;
+import dtv.tools.reader.AbstractReader;
+import dtv.tools.reader.DVBS2Reader;
+import dtv.tools.reader.DVBT2Reader;
+import dtv.tools.writer.DVBS2Writer;
+import dtv.tools.writer.DVBT2Writer;
+import dtv.tools.writer.DVBWriter;
 
 /**
  *
@@ -104,12 +104,13 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
     @Autowired
     DuplicateFinder<T> duplicate;
 
-    // test
     @Autowired
     DVBT2Reader dvbt2reader;
     @Autowired
     DVBS2Reader dvbs2reader;
-    // /test
+
+    SortedList<T> sortedDataS2;
+    SortedList<T> sortedDataT2;
 
     /**
     * The data as an observable list of Service.
@@ -185,97 +186,78 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
         // newCol.setCellValueFactory(cellData -> cellData.getValue().neewProperty());
 
         // Context menu
-        table.setRowFactory(new Callback<TableView<T>, TableRow<T>>() {
-            @Override
-            public TableRow<T> call(TableView<T> tableView) {
-                final TableRow<T> row = new TableRow<>();
-                final ContextMenu rowMenu = new ContextMenu();
+        table.setRowFactory(tableView -> {
+            final TableRow<T> row = new TableRow<>();
+            final ContextMenu rowMenu = new ContextMenu();
 
-                final MenuItem removeItem = new MenuItem("Delete");
-                removeItem.setOnAction(new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent event) {
-                        final T service = row.getItem();
-                        serviceData.removeAll(service);
-                       	serviceDB.delete_bdd(service);
-                    }
-                });
-                
-                rowMenu.getItems().addAll(removeItem);
-                row.contextMenuProperty().bind(Bindings.when(Bindings.isNotNull(row.itemProperty()))
-                        .then(rowMenu)
-                        .otherwise((ContextMenu) null));
+            final MenuItem removeItem = new MenuItem("Delete");
+            removeItem.setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    final T service = row.getItem();
+                    serviceData.removeAll(service);
+                   	serviceDB.delete_bdd(service);
+                }
+            });
+            
+            rowMenu.getItems().addAll(removeItem);
+            row.contextMenuProperty().bind(Bindings.when(Bindings.isNotNull(row.itemProperty()))
+                    .then(rowMenu)
+                    .otherwise((ContextMenu) null));
 
-                return row;
-            }
+            return row;
         });
     
-        ppr.setCellFactory(new Callback<TableColumn<T, String>, TableCell<T, String>>() {
-            @Override
-            public TableCell<T, String> call(TableColumn<T, String> col) {
-                final TableCell<T, String> cell = new TableCell<>();
-                
-                cell.textProperty().bind(cell.itemProperty());
-                cell.itemProperty().addListener(new ChangeListener<String>() {
-                    @Override
-                    public void changed(ObservableValue<? extends String> obs, String oldValue, String newValue) {
-                        if (newValue != null) {
-                            final ContextMenu cellMenu = new ContextMenu();
-                            for (int i=1; i<=10; i++) {
-                                final CheckMenuItem prefMenuItem = new CheckMenuItem(perf[i-1]);
-                                final int line = i;
+        ppr.setCellFactory(col -> {
+            final TableCell<T, String> cell = new TableCell<>();
+            
+            cell.textProperty().bind(cell.itemProperty());
+            cell.itemProperty().addListener((obs, oldValue, newValue) -> {
+                if (newValue != null) {
+                    final ContextMenu cellMenu = new ContextMenu();
+                    for (int i=1; i<=10; i++) {
+                        final CheckMenuItem prefMenuItem = new CheckMenuItem(perf[i-1]);
+                        final int line = i;
 
-                                prefMenuItem.setId(String.valueOf(i));
-                                if (ByteUtils.isPreferenceOn(cell.getText(), i)) {
-                                    prefMenuItem.setSelected(true);
-                                }
-
-                                prefMenuItem.selectedProperty().addListener(new ChangeListener<Boolean>() {
-                                    @Override
-                                    public void changed(ObservableValue<? extends Boolean> obs1, Boolean old_val, Boolean new_val) {
-                                        final String new_ppr;
-                                        final T service = (T) cell.getTableRow().getItem();
-
-                                        if (new_val) {
-                                            new_ppr = ByteUtils.add_ppr(cell.getText(), line);
-                                        } else {
-                                            new_ppr = ByteUtils.remove_ppr(cell.getText(), line);
-                                        }
-
-                                        service.setPpr(new_ppr);
-                                        service.setFlag(true);
-                                        serviceDB.update_bdd(service);
-                                    }
-                                });
-
-                                cellMenu.getItems().add(prefMenuItem);
-                                cell.setContextMenu(cellMenu);
-                            }
-                        } else {
-                            cell.setContextMenu(null);
+                        prefMenuItem.setId(String.valueOf(i));
+                        if (ByteUtils.isPreferenceOn(cell.getText(), i)) {
+                            prefMenuItem.setSelected(true);
                         }
+
+                        prefMenuItem.selectedProperty().addListener((obs1, old_val, new_val) -> {
+                            final String new_ppr;
+                            final T service = (T) cell.getTableRow().getItem();
+
+                            if (new_val) {
+                                new_ppr = ByteUtils.add_ppr(cell.getText(), line);
+                            } else {
+                                new_ppr = ByteUtils.remove_ppr(cell.getText(), line);
+                            }
+
+                            service.setPpr(new_ppr);
+                            service.setFlag(true);
+                            serviceDB.update_bdd(service);
+                        });
+
+                        cellMenu.getItems().add(prefMenuItem);
+                        cell.setContextMenu(cellMenu);
                     }
-                });
-                return cell;
-            }
+                } else {
+                    cell.setContextMenu(null);
+                }
+            });
+            return cell;
         });
-        
+
         // Editable service name
-        name.setCellFactory(new Callback<TableColumn<T, String>, TableCell<T, String>>() {
-            @Override
-            public TableCell<T, String> call(TableColumn<T, String> p) {
-                return new EditingCell();
-            }
-        });
-        name.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<T, String>>() {
-            @Override
-            public void handle(TableColumn.CellEditEvent<T, String> t) {
-                final T service = t.getTableView().getItems().get(t.getTablePosition().getRow());
-                
-                service.setName(t.getNewValue());
-                service.setFlag(true);
-                serviceDB.update_bdd(service);
-            }
+        name.setCellFactory(p -> new EditingCell());
+
+        name.setOnEditCommit(t -> {
+
+            final T service = t.getTableView().getItems().get(t.getTablePosition().getRow());
+            service.setName(t.getNewValue());
+            service.setFlag(true);
+            serviceDB.update_bdd(service);
         });
     }
 
@@ -283,21 +265,47 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
 
         pi.setVisible(false);
+
+        // test
+        FilteredList<T> filteredDataS2 = new FilteredList<>(serviceDataS2, p -> true);
+        FilteredList<T> filteredDataT2 = new FilteredList<>(serviceDataT2, p -> true);
+
+        s_name.textProperty().addListener(obs -> filteredDataS2.setPredicate(getPredicate(s_name.getText())));
+        s_name.textProperty().addListener(obs -> filteredDataT2.setPredicate(getPredicate(s_name.getText())));
+
+        sortedDataS2 = new SortedList<>(filteredDataS2);
+        sortedDataT2 = new SortedList<>(filteredDataT2);
+        sortedDataS2.comparatorProperty().bind(serviceDVBS2Table.comparatorProperty());
+        sortedDataT2.comparatorProperty().bind(serviceDVBT2Table.comparatorProperty());
+
         init(serviceDataS2, (DVBDBService<T>) serviceDBS2, serviceDVBS2Table, s_idxColumnS2, s_nameColumnS2, s_typeColumnS2, s_pprColumnS2);
         init(serviceDataT2, (DVBDBService<T>) serviceDBT2, serviceDVBT2Table, s_idxColumnT2, s_nameColumnT2, s_typeColumnT2, s_pprColumnT2);
+
         disableComponents(true);
+    }
+
+    private Predicate<T> getPredicate(String filter) {
+    	 return (s -> {
+        	if (filter == null || filter.isEmpty()) {
+        		return true;
+        	}
+
+        	String lower = filter.toLowerCase();
+        	return (s.getName().toLowerCase().contains(lower) ||
+        			(s.getIdx() + "").toLowerCase().contains(lower));
+        });
     }
 
     @FXML
     private void openAction(ActionEvent event) throws Exception {
 
-        fileChooser.setTitle("Open Services File");
         fileChooser.setInitialDirectory(currentDir.exists() ? currentDir : null);
-        File rootFolder = fileChooser.showDialog(tabPane.getScene().getWindow()); // OpenDialog(serviceTable.getScene().getWindow());
+	    fileChooser.setTitle("Choose the DTV backup folder");
+        File rootFolder = fileChooser.showDialog(tabPane.getScene().getWindow());
 
         if (rootFolder != null) {
 
-            currentDir = rootFolder; // .getParentFile();
+            currentDir = rootFolder;
             initFiles(rootFolder);
             AbstractReader<T> reader;
 			serviceDataS2.clear();
@@ -371,12 +379,12 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
 	@FXML
 	private void saveAction(ActionEvent event) throws Exception {
 
-    	fileChooser.setTitle("Export Services");
 	    fileChooser.setInitialDirectory(currentDir.exists() ? currentDir : null);
+	    fileChooser.setTitle("Choose the folder to where store the files");
 	    File rootFolder = fileChooser.showDialog(tabPane.getScene().getWindow()); // SaveDialog(serviceTable.getScene().getWindow());
 
 	    if (rootFolder != null) {
-	        currentDir = rootFolder; //.getParentFile();
+	        currentDir = rootFolder;
 	        // save DVB-S2
 			if (dvbs2File != null) {
 				writer = (DVBWriter<T>) dvbs2Writer;
@@ -448,18 +456,31 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
 		}
     }
 
-	@FXML
+    private ObservableList<T> getData() {
+
+		if (tabPane.getSelectionModel().isSelected(0)) {
+	    	return serviceDataS2; 
+		}
+
+		if (tabPane.getSelectionModel().isSelected(1)) {
+	    	return serviceDataT2; 
+		}
+
+		return null;
+    }
+
+	// @FXML
     private void filterAction(KeyEvent event) {
 
 		if (tabPane.getSelectionModel().isSelected(0)) {
 			// DVB-S2
 	    	List<T> services = (List<T>) serviceDBS2.read_bdd(s_name.getText());
-	        serviceDataS2.setAll(services);
+	    	serviceDataS2.setAll(services);
 
 		} else if (tabPane.getSelectionModel().isSelected(1)) {
 			// DVB-T2
 	    	List<T> services = (List<T>) serviceDBT2.read_bdd(s_name.getText());
-	        serviceDataT2.setAll(services);
+	    	serviceDataT2.setAll(services);
 		}
     }
 
@@ -468,31 +489,25 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
         pi.visibleProperty().bind(task.runningProperty());
         pi.progressProperty().bind(task.progressProperty());
 
-        task.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
-			@Override
-            public void handle(WorkerStateEvent t) {
-                // print services into tableview
-        		List<T> dvbServices = task.getValue();
-        		if (dvbServices != null) {
-            		if (action.contains(DVB_S2)) {
-                		serviceDataS2.setAll(dvbServices);
-            			serviceDVBS2Table.setItems(serviceDataS2);
-            		} else if (action.contains(DVB_T2)) {
-                		serviceDataT2.setAll(dvbServices);
-                		serviceDVBT2Table.setItems(serviceDataT2);
-            		}
-            	}
+        task.setOnSucceeded(t -> {
+            // print services into tableview
+    		List<T> dvbServices = task.getValue();
+    		if (dvbServices != null) {
+        		if (action.contains(DVB_S2)) {
+            		serviceDataS2.setAll(dvbServices);
+        			serviceDVBS2Table.setItems(sortedDataS2);
+        		} else if (action.contains(DVB_T2)) {
+            		serviceDataT2.setAll(dvbServices);
+            		serviceDVBT2Table.setItems(sortedDataT2);
+        		}
+        	}
 
-                if (zeTitle != null) title.setText(zeTitle);
-                disableComponents(false);
-            }
+            if (zeTitle != null) title.setText(zeTitle);
+            disableComponents(false);
         });
 
-        task.setOnFailed(new EventHandler<WorkerStateEvent>() {
-            @Override
-            public void handle(WorkerStateEvent t) {
-                Message.errorMessage("Error " + action + "\n" + task.getException().getMessage());
-            }
+        task.setOnFailed(t -> {
+        	Message.errorMessage("Error " + action + "\n" + task.getException().getMessage());
         });
 
     	if (!task.isRunning()) {
