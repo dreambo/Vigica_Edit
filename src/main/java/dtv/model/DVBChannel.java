@@ -16,18 +16,16 @@
  */
 package dtv.model;
 
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
-
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 
 /**
  * Model class for
@@ -43,9 +41,8 @@ public class DVBChannel {
     private final StringProperty name;
     private final IntegerProperty nid;
     private final StringProperty ppr;
-    private final StringProperty line;
-    private final BooleanProperty flag;
-    private final StringProperty neew;
+    private String line;
+    private boolean flag = false;
     
     public DVBChannel() {
         this.type = new SimpleStringProperty("");
@@ -53,20 +50,15 @@ public class DVBChannel {
         this.name = new SimpleStringProperty("");
         this.nid = new SimpleIntegerProperty(0);
         this.ppr = new SimpleStringProperty("");
-        this.line = new SimpleStringProperty("");
-        this.flag = new SimpleBooleanProperty(false);
-        this.neew = new SimpleStringProperty("");
     }
     
-    public DVBChannel(String stype, Integer recd_idx, String rcdname_s, Integer nid_d, String ppr_s, String line_s, Boolean flag_b, String new_b) {
+    public DVBChannel(String stype, Integer recd_idx, String rcdname_s, Integer nid_d, String ppr_s, String line_s) {
         this.type = new SimpleStringProperty(stype);
         this.idx = new SimpleIntegerProperty(recd_idx);
         this.name = new SimpleStringProperty(rcdname_s);
         this.nid = new SimpleIntegerProperty(nid_d);
         this.ppr = new SimpleStringProperty(ppr_s);
-        this.line = new SimpleStringProperty(line_s);
-        this.flag = new SimpleBooleanProperty(flag_b);
-        this.neew = new SimpleStringProperty(new_b);
+        this.line = line_s;
     }
 
 	@Id
@@ -128,37 +120,17 @@ public class DVBChannel {
     
     @Column(length=600)
     public String getLine() {
-        return line.get();
-    }
-    public void setLine(String line) {
-        this.line.set(line);
-    }
-
-    public StringProperty lineProperty() {
         return line;
     }
+    public void setLine(String line) {
+        this.line = line;
+    }
     
-    public Boolean getFlag() {
-        return flag.get();
-    }
-    public void setFlag(Boolean flag) {
-        this.flag.set(flag);
-    }
-
-    public BooleanProperty flagProperty() {
+    public boolean getFlag() {
         return flag;
     }
-    
-    @Column(name="NEW")
-    public String getNeew() {
-        return neew.get();
-    }
-    public void setNeew(String neew) {
-        this.neew.set(neew);
-    }
-
-    public StringProperty neewProperty() {
-        return neew;
+    public void setFlag(boolean flag) {
+        this.flag = flag;
     }
 
     @Override

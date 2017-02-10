@@ -109,7 +109,7 @@ public abstract class AbstractReader<T extends DVBChannel> extends Service<List<
             String rcdname_s = new String(entryName, "UTF-8");
             String binrcd_s = ByteUtils.base64Encoder(entry);
             // String asciiname = stype + "~" + recd_idx + "~" + rcdname_s + "~E0~" + "N" + nid_d + "~" + "P" + ppr_s;
-            T service = getDVBService(stype, ++recd_idx, rcdname_s, nid_d, ppr_s, binrcd_s, false, "");
+            T service = getDVBService(stype, ++recd_idx, rcdname_s, nid_d, ppr_s, binrcd_s);
 
             services.add(service);
             bind_idx = nxt_idx + offset;
@@ -118,7 +118,7 @@ public abstract class AbstractReader<T extends DVBChannel> extends Service<List<
         return services;
     }
 
-	protected abstract T getDVBService(String stype, int i, String rcdname_s, int nid_d, String ppr_s, String binrcd_s, boolean b, String string);
+	protected abstract T getDVBService(String stype, int i, String rcdname_s, int nid_d, String ppr_s, String binrcd_s);
 
 	protected abstract int getOffset(byte version);
 

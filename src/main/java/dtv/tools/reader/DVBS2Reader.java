@@ -20,7 +20,7 @@ public class DVBS2Reader extends AbstractReader<DVBS2Channel> {
 	}
 
 	@Override
-	protected DVBS2Channel getDVBService(String stype, int i, String rcdname_s, int nid_d, String ppr_s, String binrcd_s, boolean b, String string) {
-		return new DVBS2Channel(stype, i, rcdname_s, nid_d, ppr_s, binrcd_s, b, string);
+	protected DVBS2Channel getDVBService(String stype, int i, String rcdname_s, int nid_d, String ppr_s, String binrcd_s) {
+		return new DVBS2Channel(stype, i, rcdname_s, nid_d, ppr_s, binrcd_s);
 	}
 }
