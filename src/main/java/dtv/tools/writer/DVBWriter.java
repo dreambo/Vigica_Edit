@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import dtv.database.DVBDBService;
 import dtv.model.DVBChannel;
 import dtv.tools.ByteUtils;
 import javafx.concurrent.Service;
@@ -18,22 +17,23 @@ public abstract class DVBWriter<T extends DVBChannel> extends Service<List<T>> {
     public abstract void setDvbFile(File dvbFile);
 	public abstract List<Byte> getFileVersion();
 	public abstract void setFileVersion(List<Byte> fileversion);
-	public abstract DVBDBService<T> getServiceDB();
+	public abstract List<T> getServices();
+	public abstract void setServices(List<T> services);
 
 	/**
      * compress this list of dvb services into a the file dvbFile
      * @param chemin
      */
-    public void compress(List<T> services) throws Exception {
+    public void compress() throws Exception {
 
     	List<Byte> satservices = new ArrayList<>();
     	List<Byte> sdata;
     	int index = 0;
 
     	// TODO: only for tests
-    	Collections.sort(services, (s1, s2) -> s1.getName().compareTo(s2.getName()));
+    	Collections.sort(getServices(), (s1, s2) -> s1.getName().compareTo(s2.getName()));
 
-        for (T service : services) {
+        for (T service : getServices()) {
 
         	// last two bytes must be the channel index, beginning from 0
             Byte[] indexBa = ByteUtils.int2ba(index++);
@@ -76,7 +76,7 @@ public abstract class DVBWriter<T extends DVBChannel> extends Service<List<T>> {
             }
         }
 
-        List<Byte> servicesCount = Arrays.asList(ByteUtils.int2ba(services.size())); // 4 bytes
+        List<Byte> servicesCount = Arrays.asList(ByteUtils.int2ba(getServices().size())); // 4 bytes
         List<Byte> servicesData  = new ArrayList<>();
 
         servicesData.addAll(getFileVersion());
@@ -128,7 +128,7 @@ public abstract class DVBWriter<T extends DVBChannel> extends Service<List<T>> {
 			@Override
 			protected List<T> call() throws Exception {
 	            updateProgress(-1, 0);
-	            compress(getServiceDB().read_bdd());
+	            compress();
 	            updateProgress(1, 1);
 
 	            return null;

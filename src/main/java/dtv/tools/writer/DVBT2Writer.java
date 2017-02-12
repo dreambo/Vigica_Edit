@@ -20,11 +20,8 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import dtv.database.DVBDBService;
-import dtv.database.DVBT2DBService;
 import dtv.model.DVBT2Channel;
 
 /**
@@ -34,11 +31,10 @@ import dtv.model.DVBT2Channel;
 @Component
 public class DVBT2Writer extends DVBWriter<DVBT2Channel> {
 
-	@Autowired
-	private DVBT2DBService bdd;
-	private File dvbFile;
-
 	private List<Byte> fileVersion = Arrays.asList((byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x0C); // file version 4 bytes
+
+	private File dvbFile;
+	private List<DVBT2Channel> services;
 
 	@Override
     public void setDvbFile(File dvbFile) {
@@ -51,11 +47,6 @@ public class DVBT2Writer extends DVBWriter<DVBT2Channel> {
 	}
 
 	@Override
-    public DVBDBService<DVBT2Channel> getServiceDB() {
-    	return (DVBDBService<DVBT2Channel>) bdd;
-    }
-
-	@Override
     public void setFileVersion(List<Byte> fileVersion) {
     	this.fileVersion = fileVersion;
     }
@@ -64,4 +55,14 @@ public class DVBT2Writer extends DVBWriter<DVBT2Channel> {
     public List<Byte> getFileVersion() {
     	return fileVersion;
     }
+
+	@Override
+	public List<DVBT2Channel> getServices() {
+		return services;
+	}
+
+	@Override
+	public void setServices(List<DVBT2Channel> services) {
+		this.services = services;
+	}
 }

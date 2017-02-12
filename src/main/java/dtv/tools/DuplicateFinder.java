@@ -19,15 +19,14 @@ package dtv.tools;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import dtv.model.DVBChannel;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
-
-import org.apache.log4j.Logger;
-import org.springframework.stereotype.Component;
-
-import dtv.database.DVBDBService;
-import dtv.model.DVBChannel;
 
 /**
  * Util class for file decomposition
@@ -37,17 +36,7 @@ import dtv.model.DVBChannel;
 @Component
 public class DuplicateFinder<T extends DVBChannel> extends Service<List<T>> {
 
-	private static final Logger LOG = Logger.getLogger(DuplicateFinder.class);
-
-    private DVBDBService<T> bdd;
-
-    public DVBDBService<T> getBdd() {
-		return bdd;
-	}
-
-	public void setBdd(DVBDBService<T> bdd) {
-		this.bdd = bdd;
-	}
+	private static final Logger LOG = LoggerFactory.getLogger(DuplicateFinder.class);
 
 	private ObservableList<T> services;
 
@@ -78,9 +67,6 @@ public class DuplicateFinder<T extends DVBChannel> extends Service<List<T>> {
 	                    uniqueIds.add(service.getName());
 	                }
 	            }
-
-	            // Add to database
-	            bdd.save_bdd(servicesUnique);
 
 	            return servicesUnique;
 			}

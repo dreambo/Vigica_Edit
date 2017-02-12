@@ -1,8 +1,5 @@
 package dtv.model;
 
-import javax.persistence.Entity;
-
-@Entity
 public class DVBT2Channel extends DVBChannel {
 
 	public DVBT2Channel() {

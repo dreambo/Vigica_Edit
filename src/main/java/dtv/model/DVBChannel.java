@@ -21,19 +21,11 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-
 /**
  * Model class for
  * 
  * @author nabillo
  */
-@Entity
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class DVBChannel {
 
     private final IntegerProperty idx;
@@ -61,7 +53,6 @@ public class DVBChannel {
         this.line = line_s;
     }
 
-	@Id
     public int getIdx() {
         return idx.get();
     }
@@ -118,7 +109,6 @@ public class DVBChannel {
         return ppr;
     }
     
-    @Column(length=600)
     public String getLine() {
         return line;
     }

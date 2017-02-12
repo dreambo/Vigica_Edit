@@ -24,31 +24,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import dtv.controller.Message;
+import dtv.model.DVBChannel;
+import dtv.tools.ByteUtils;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 
-import org.apache.log4j.Logger;
-
-import dtv.controller.Message;
-import dtv.database.DVBDBService;
-import dtv.model.DVBChannel;
-import dtv.tools.ByteUtils;
-
 public abstract class AbstractReader<T extends DVBChannel> extends Service<List<T>> {
 
-	private static final Logger LOG = Logger.getLogger(AbstractReader.class);
+	private static final Logger LOG = LoggerFactory.getLogger(AbstractReader.class);
 
     private File dvbFile;
     private List<Byte> fileVersion;
-
-    // @Autowired
-    private DVBDBService<T> bdd;
-
-    public AbstractReader() {}
-
-	public void setServiceDB(DVBDBService<T> bdd) {
-        this.bdd = bdd;
-    }
 
 	public void setDvbFile(File dvbFile) {
         this.dvbFile = dvbFile;
@@ -167,24 +157,8 @@ public abstract class AbstractReader<T extends DVBChannel> extends Service<List<
 			@Override
 			protected List<T> call() throws Exception {
 
-				int countOK = 0;
-	            int countKO = 0;
-
 	            updateProgress(-1, 0);
-	            List<T> services = decompress();
-
-	            // Add to database
-	            for (T service : services) try {
-	                updateProgress(countOK + countKO, services.size());
-	                bdd.save_bdd(service);
-	                countOK++;
-	            } catch(Exception e) {
-	            	LOG.error("Error while saving services", e);
-	                countKO++;
-	            }
-
-	            LOG.info("Services OK: " + countOK + " -- Services KO: " + countKO);
-	            return services;
+	            return decompress();
 			}
 		};
 	}

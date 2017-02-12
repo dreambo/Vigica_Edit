@@ -18,6 +18,13 @@ package dtv;
 
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Lazy;
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.application.Preloader;
@@ -26,12 +33,6 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
-
-import org.apache.log4j.Logger;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.Lazy;
 
 /**
  * Main class
@@ -42,7 +43,7 @@ import org.springframework.context.annotation.Lazy;
 @SpringBootApplication
 public class Vigica extends Application {
 
-	private static final Logger LOG = Logger.getLogger(Vigica.class);
+	private static final Logger LOG = LoggerFactory.getLogger(Vigica.class);
 
 	private static String[] args;
 	private static ConfigurableApplicationContext applicationContext;
