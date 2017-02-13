@@ -26,7 +26,7 @@ import javafx.beans.property.StringProperty;
  * 
  * @author nabillo
  */
-public class DVBChannel {
+public class DVBChannel implements Comparable<DVBChannel> {
 
     private final IntegerProperty idx;
     private final StringProperty type;
@@ -132,16 +132,26 @@ public class DVBChannel {
 
     	DVBChannel dvbService = (DVBChannel) obj;
 
-    	return (getName() != null && getName().equals(dvbService.getName()));
+    	return (getName() != null && getName().equals(dvbService.getName()) && getType() != null && getType().equals(dvbService.getType()));
     }
 
     @Override
     public int hashCode() {
-    	return (getName() == null ? 0 : getName().hashCode());
+    	return (getName() + getType()).hashCode();
     }
 
     @Override
     public String toString() {
     	return getName() + "[" + getNid() + "]";
     }
+
+	@Override
+	public int compareTo(DVBChannel channel) {
+
+		if (getName() != null && getType() != null && getType().equals(channel.getType())) {
+			return getName().toLowerCase().compareTo(channel.getName().toLowerCase());
+		}
+
+		return 0;
+	}
 }

@@ -29,16 +29,26 @@ public class Message {
 	private Message() {}
 
 	public static void errorMessage(String msg) {
-        Alert alert = new Alert(AlertType.ERROR);
-        alert.setTitle("Error");
-        alert.setHeaderText(null);
-        alert.setContentText(msg);
-
-        alert.showAndWait();
+    	showMessage(msg, false);
     }
     
     public static void infoMessage(String msg) {
-        Alert alert = new Alert(AlertType.INFORMATION);
+    	showMessage(msg, true);
+    }
+
+    private static void showMessage(String msg, boolean info) {
+
+    	/*
+    	Stage dialog = new Stage();
+    	dialog.initStyle(StageStyle.UTILITY);
+    	Scene scene = new Scene(new Group(new Text(25, 25, msg)));
+    	dialog.setResizable(false);
+    	dialog.setWidth(200);
+    	dialog.setHeight(100);
+    	dialog.setScene(scene);
+    	dialog.show();
+    	*/
+        Alert alert = new Alert(info ? AlertType.INFORMATION : AlertType.ERROR);
         alert.setTitle("Info");
         alert.setHeaderText(null);
         alert.setContentText(msg);

@@ -16,17 +16,17 @@
  */
 package dtv.tools;
 
-import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import dtv.model.DVBChannel;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
+
+import org.springframework.stereotype.Component;
+
+import dtv.model.DVBChannel;
 
 /**
  * Util class for file decomposition
@@ -34,13 +34,13 @@ import javafx.concurrent.Task;
  * @author nabillo
  */
 @Component
-public class DuplicateFinder<T extends DVBChannel> extends Service<List<T>> {
-
-	private static final Logger LOG = LoggerFactory.getLogger(DuplicateFinder.class);
+public class DuplicateRemover<T extends DVBChannel> extends Service<List<T>> {
 
 	private ObservableList<T> services;
 
-    public DuplicateFinder() {}
+	public ObservableList<T> getServices() {
+        return services;
+    }
 
 	public void setServices(ObservableList<T> services) {
         this.services = services;
@@ -52,23 +52,16 @@ public class DuplicateFinder<T extends DVBChannel> extends Service<List<T>> {
 		return new Task<List<T>>() {
 			@Override
 			protected List<T> call() throws Exception {
-	            List<T> servicesUnique = new ArrayList<>();
-
+	            Set<T> serviceSet = new LinkedHashSet<T>(services);
 	            updateProgress(-1, 0);
-	            List<String> uniqueIds = new ArrayList<>();
+
+	            services.setAll(serviceSet);
 	            int i = 0;
+	            for (T service : services) {
+	    			service.setIdx(++i);
+	    		}
 
-	            for (T service: services) {
-	                if (uniqueIds.contains(service.getName()) && service.getPpr().isEmpty()) {
-	                	LOG.info("Service " + service + " duplicated!");
-	                } else {
-	                    service.setIdx(++i);
-	                    servicesUnique.add(service);
-	                    uniqueIds.add(service.getName());
-	                }
-	            }
-
-	            return servicesUnique;
+	            return services;
 			}
 		};
 	}
