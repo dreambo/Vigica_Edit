@@ -27,12 +27,11 @@ public abstract class DVBWriter<T extends DVBChannel> extends Service<List<T>> {
 
     	List<Byte> satservices = new ArrayList<>();
     	List<Byte> sdata;
-    	int index = 0;
 
         for (T service : getServices()) {
 
         	// last two bytes must be the channel index, beginning from 0
-            Byte[] indexBa = Utils.int2ba(index++);
+            Byte[] indexBa = Utils.int2ba(service.getIdx());
             sdata = Utils.base64Decoder(service.getLine()); // ByteUtils.hexStringToBytes(service.getLine());
             sdata.set(sdata.size() - 1, indexBa[indexBa.length - 1]);
             sdata.set(sdata.size() - 2, indexBa[indexBa.length - 2]);
