@@ -41,16 +41,16 @@ import javafx.stage.Stage;
  */
 @Lazy
 @SpringBootApplication
-public class Vigica extends Application {
+public class DTVEdit extends Application {
 
-	private static final Logger LOG = LoggerFactory.getLogger(Vigica.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DTVEdit.class);
 
 	private static String[] args;
 	private static ConfigurableApplicationContext applicationContext;
 
     public static void main(String[] args) {
 
-    	launch(Vigica.class, Vigica.args = args);
+    	launch(DTVEdit.class, DTVEdit.args = args);
     }
 
 	@Override
@@ -70,7 +70,7 @@ public class Vigica extends Application {
 
 		notifyPreloader(new Preloader.StateChangeNotification(Preloader.StateChangeNotification.Type.BEFORE_START));
 
-        primaryStage.setTitle("Vigica Edit");
+        primaryStage.setTitle("DTV Edit");
         primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/app_icon.png")));
 
         AnchorPane mainView = (AnchorPane) load("/dtv/view/FXMLMain.fxml");
@@ -92,7 +92,7 @@ public class Vigica extends Application {
     public static Object load(String url) {
         FXMLLoader loader = new FXMLLoader();
         loader.setControllerFactory(clazz -> applicationContext.getBean(clazz));
-        loader.setLocation(Vigica.class.getResource(url));
+        loader.setLocation(DTVEdit.class.getResource(url));
 
         try {
             return loader.load();
