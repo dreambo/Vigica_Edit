@@ -3,13 +3,12 @@ package dtv.tools.writer;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
-import dtv.model.DVBChannel;
-import dtv.tools.ByteUtils;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
+import dtv.model.DVBChannel;
+import dtv.tools.Utils;
 
 public abstract class DVBWriter<T extends DVBChannel> extends Service<List<T>> {
 
@@ -30,14 +29,11 @@ public abstract class DVBWriter<T extends DVBChannel> extends Service<List<T>> {
     	List<Byte> sdata;
     	int index = 0;
 
-    	// TODO: only for tests
-    	Collections.sort(getServices(), (s1, s2) -> s1.getName().compareTo(s2.getName()));
-
         for (T service : getServices()) {
 
         	// last two bytes must be the channel index, beginning from 0
-            Byte[] indexBa = ByteUtils.int2ba(index++);
-            sdata = ByteUtils.base64Decoder(service.getLine()); // ByteUtils.hexStringToBytes(service.getLine());
+            Byte[] indexBa = Utils.int2ba(index++);
+            sdata = Utils.base64Decoder(service.getLine()); // ByteUtils.hexStringToBytes(service.getLine());
             sdata.set(sdata.size() - 1, indexBa[indexBa.length - 1]);
             sdata.set(sdata.size() - 2, indexBa[indexBa.length - 2]);
 
@@ -76,7 +72,7 @@ public abstract class DVBWriter<T extends DVBChannel> extends Service<List<T>> {
             }
         }
 
-        List<Byte> servicesCount = Arrays.asList(ByteUtils.int2ba(getServices().size())); // 4 bytes
+        List<Byte> servicesCount = Arrays.asList(Utils.int2ba(getServices().size())); // 4 bytes
         List<Byte> servicesData  = new ArrayList<>();
 
         servicesData.addAll(getFileVersion());
@@ -84,18 +80,18 @@ public abstract class DVBWriter<T extends DVBChannel> extends Service<List<T>> {
         servicesData.addAll(satservices);
 
         //CRC32
-        String crcresult = ByteUtils.crc32Mpeg(servicesData);
+        String crcresult = Utils.crc32Mpeg(servicesData);
         crcresult = ("00000000" + crcresult).substring(crcresult.length());
-        List<Byte> crcbyte = ByteUtils.hexStringToBytes(crcresult);
+        List<Byte> crcbyte = Utils.hexStringToBytes(crcresult);
         
         List<Byte> mw_s1 = new ArrayList<>();
-        List<Byte> flbytes = Arrays.asList(ByteUtils.int2ba(12 + satservices.size())); // 4 crc + 4 type + 4 service count + all service records
+        List<Byte> flbytes = Arrays.asList(Utils.int2ba(12 + satservices.size())); // 4 crc + 4 type + 4 service count + all service records
 
         mw_s1.addAll(flbytes);
         mw_s1.addAll(crcbyte);
         mw_s1.addAll(servicesData);
 
-        ByteUtils.writeBytesToFile(mw_s1, getDvbFile());
+        Utils.writeBytesToFile(mw_s1, getDvbFile());
     }
 
     private List<Byte> getPpr(String preference) {

@@ -9,7 +9,9 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
-public class ByteUtils {
+import dtv.model.DVBChannel;
+
+public class Utils {
 
     public static String bytesToHexString(byte[] in) {
         final StringBuilder builder = new StringBuilder();
@@ -183,5 +185,12 @@ public class ByteUtils {
         long fullMask = (((1L << 31) - 1L) << 1) | 1L;
 
         return Long.toHexString(register & fullMask);
+    }
+
+    public static <T extends DVBChannel> void initIds(List<T> services) {
+        int i = 0;
+        for (T service : services) {
+			service.setIdx(++i);
+		}
     }
 }

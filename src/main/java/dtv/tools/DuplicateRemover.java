@@ -56,10 +56,7 @@ public class DuplicateRemover<T extends DVBChannel> extends Service<List<T>> {
 	            updateProgress(-1, 0);
 
 	            services.setAll(serviceSet);
-	            int i = 0;
-	            for (T service : services) {
-	    			service.setIdx(++i);
-	    		}
+	            Utils.initIds(services);
 
 	            return services;
 			}

@@ -25,7 +25,9 @@ import java.util.ResourceBundle;
 import java.util.Scanner;
 import java.util.function.Predicate;
 
+import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -59,8 +61,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import dtv.model.DVBChannel;
-import dtv.tools.ByteUtils;
 import dtv.tools.DuplicateRemover;
+import dtv.tools.Utils;
 import dtv.tools.reader.AbstractReader;
 import dtv.tools.reader.DVBS2Reader;
 import dtv.tools.reader.DVBT2Reader;
@@ -123,6 +125,8 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
     private ObservableList<T> serviceDataT2 = FXCollections.observableArrayList();
 
     private File currentDir = new File("src/test/resources");
+
+    private TableView<T> currentTable;
 
     @FXML
     TabPane tabPane;
@@ -230,7 +234,7 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
                         final int line = i;
 
                         prefMenuItem.setId(String.valueOf(i));
-                        if (ByteUtils.isPreferenceOn(cell.getText(), i)) {
+                        if (Utils.isPreferenceOn(cell.getText(), i)) {
                             prefMenuItem.setSelected(true);
                         }
 
@@ -239,9 +243,9 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
                             final T service = (T) cell.getTableRow().getItem();
 
                             if (new_val) {
-                                new_ppr = ByteUtils.add_ppr(cell.getText(), line);
+                                new_ppr = Utils.add_ppr(cell.getText(), line);
                             } else {
-                                new_ppr = ByteUtils.remove_ppr(cell.getText(), line);
+                                new_ppr = Utils.remove_ppr(cell.getText(), line);
                             }
 
                             service.setPpr(new_ppr);
@@ -275,11 +279,11 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
         pi.setVisible(false);
 
         // test
-        FilteredList<T> filteredDataS2 = new FilteredList<>(serviceDataS2, p -> true);
-        FilteredList<T> filteredDataT2 = new FilteredList<>(serviceDataT2, p -> true);
+        FilteredList<T> filteredDataS2 = new FilteredList<>(serviceDataS2);
+        FilteredList<T> filteredDataT2 = new FilteredList<>(serviceDataT2);
 
-        s_name.textProperty().addListener(obs -> filteredDataS2.setPredicate(getPredicate(s_name.getText())));
-        s_name.textProperty().addListener(obs -> filteredDataT2.setPredicate(getPredicate(s_name.getText())));
+        s_name.textProperty().addListener(obs -> filteredDataS2.setPredicate(getPredicate(obs)));
+        s_name.textProperty().addListener(obs -> filteredDataT2.setPredicate(getPredicate(obs)));
 
         sortedDataS2 = new SortedList<>(filteredDataS2);
         sortedDataT2 = new SortedList<>(filteredDataT2);
@@ -293,15 +297,15 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
         disableComponents(true);
     }
 
-    private Predicate<T> getPredicate(String filter) {
-    	 return (s -> {
-        	if (filter == null || filter.isEmpty()) {
+    private Predicate<T> getPredicate(Observable filter) {
+
+    	return (s -> {
+        	if (filter == null || !(filter instanceof StringProperty)) {
         		return true;
         	}
 
-        	String lower = filter.toLowerCase();
-        	return (s.getName().toLowerCase().contains(lower) ||
-        			(s.getIdx() + "").toLowerCase().contains(lower));
+        	String lower = ((StringProperty) filter).getValue().toLowerCase();
+        	return (lower.isEmpty() || s.getName().toLowerCase().contains(lower) || (s.getIdx() + "").toLowerCase().contains(lower));
         });
     }
 
@@ -357,7 +361,7 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
 				LOG.info(msg);
 				logs.appendText("\n" + msg);
 				try {
-					prefs.setText(setPreferences());
+					prefs.setText(getPreferences());
 				} catch (Exception e) {}
 
 			} else if (dtvFile.getName().equalsIgnoreCase(CCCAM_CFG)) {
@@ -369,7 +373,7 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
 		}
 	}
 
-	private String setPreferences() throws Exception {
+	private String getPreferences() throws Exception {
 		Scanner scanner = new Scanner(prefsFile);
 		String line;
 
@@ -456,9 +460,11 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
 
 		ObservableList<T> tableData = getData();
 		if (tableData != null) {
-			Comparator<T> comparator = (channel1, channel2)  -> (order * channel1.compareTo(channel2));
+			currentTable.getSortOrder().clear();
+			tableData.setAll(currentTable.getItems());
+			Comparator<T> comparator = (channel1, channel2) -> (order * channel1.compareTo(channel2));
 			Collections.sort(tableData, comparator);
-			initIds(tableData);
+			Utils.initIds(tableData);
 			order = -order;
 		}
     }
@@ -466,10 +472,12 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
     private ObservableList<T> getData() {
 
 		if (tabPane.getSelectionModel().isSelected(0)) {
+			currentTable = serviceDVBS2Table;
 	    	return serviceDataS2; 
 		}
 
 		if (tabPane.getSelectionModel().isSelected(1)) {
+			currentTable = serviceDVBT2Table;
 	    	return serviceDataT2; 
 		}
 
@@ -581,11 +589,4 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
         duplicateButton.setDisable(disable);
         tabPane.setDisable(disable);
 	}
-
-    private void initIds(List<T> services) {
-        int i = 0;
-        for (T service : services) {
-			service.setIdx(++i);
-		}
-    }
 }

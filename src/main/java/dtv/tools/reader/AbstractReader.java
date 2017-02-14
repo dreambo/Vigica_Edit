@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import dtv.controller.Message;
 import dtv.model.DVBChannel;
-import dtv.tools.ByteUtils;
+import dtv.tools.Utils;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 
@@ -71,7 +71,7 @@ public abstract class AbstractReader<T extends DVBChannel> extends Service<List<
         int offset = getOffset(fileVersion.get(3));
 
         while (recd_idx < recd_nmbr_d) {
-            int nxt_idx = ByteUtils.find_end(bindata, bind_idx, getEndMagic());
+            int nxt_idx = Utils.find_end(bindata, bind_idx, getEndMagic());
             if (nxt_idx < 0) {
             	LOG.error("Can not find magic end " + getEndMagic());
             	return services;
@@ -91,13 +91,13 @@ public abstract class AbstractReader<T extends DVBChannel> extends Service<List<
             }
 
             byte[] nid_s = Arrays.copyOfRange(entry, entryLength - 26, entryLength - 24); // also fixed distance back from end
-            int nid_d = ByteUtils.getInt(nid_s); // make the two bytes into an integer
+            int nid_d = Utils.getInt(nid_s); // make the two bytes into an integer
             byte[] ppr = Arrays.copyOfRange(entry, entryLength - 10, entryLength - 8); // preference setting
             String ppr_s = getPreference(ppr);
 
             // add the network number and preference setting to the end of the file name
             String rcdname_s = new String(entryName, "UTF-8");
-            String binrcd_s = ByteUtils.base64Encoder(entry);
+            String binrcd_s = Utils.base64Encoder(entry);
             // String asciiname = stype + "~" + recd_idx + "~" + rcdname_s + "~E0~" + "N" + nid_d + "~" + "P" + ppr_s;
             T service = getDVBService(stype, ++recd_idx, rcdname_s, nid_d, ppr_s, binrcd_s);
 
