@@ -13,6 +13,8 @@ import dtv.model.DVBChannel;
 
 public class Utils {
 
+    public static String[] prefTab = {"GENERAL", "INFO", "DOCUMENTARY", "MOVIES", "TV SHOW", "ZIC", "SPORT", "KIDS", "DIN", "MISC"};
+
     public static String bytesToHexString(byte[] in) {
         final StringBuilder builder = new StringBuilder();
         for (byte b : in) {
@@ -51,66 +53,38 @@ public class Utils {
         return val;
     }
 
-    public static Boolean isPreferenceOn(String ppr_s, int index) {
-        Boolean isOk = false;
+    public static Boolean isPreferenceOn(String ppr_s, String pref) {
+
         for (String ppr: ppr_s.split("-")) {
-            if (ppr.equals(String.valueOf(index))) {
-                isOk = true;
+            if (ppr.equals(pref)) {
+                return true;
             }
         }
 
-        return isOk;
+        return false;
     }
 
-    public static String add_ppr(String old_ppr, int new_Value) {
-        String new_ppr = "";
-        Boolean isFirst = true;
-        Boolean isAdded = false;
+    public static String setPref(String old_ppr, String new_Value, boolean add) {
 
         // not preference yet
         if (old_ppr.length() == 0) {
             return old_ppr += new_Value;
         }
 
-        for (String ppr: old_ppr.split("-")) {
-            // still not in position
-            if ((Integer.valueOf(ppr) < new_Value)) {
-                if (isFirst) {
-                    new_ppr += ppr;
-                    isFirst = false;
-                } else {
-                    new_ppr += "-" + ppr;
-                }
-            // here we are
-            } else if ((Integer.valueOf(ppr) > new_Value) && !isAdded) {
-                // expect for 1 to not have a -
-                if (new_Value == 1) {
-                    new_ppr += new_Value + "-" + ppr;
-                } else {
-                    new_ppr += "-" + new_Value + "-" + ppr;
-                }
-
-                isAdded = true;
-            // the rest of the line
-            } else {
-                new_ppr += "-" + ppr;
-            }
-        }
-
-        // if new value is the last one we added it manualy
-        if (!isAdded) {
-            new_ppr += "-" + new_Value;
-        }
-
-        return new_ppr;
+        return (old_ppr + "-" + new_Value);
     }
-    
-    public static String remove_ppr(String old_ppr, int new_Value) {
+
+    public static String add_ppr(String old_ppr, String new_Value) {
+
+        return (old_ppr + (old_ppr.isEmpty() ? "" : "-" ) + new_Value);
+    }
+
+    public static String remove_ppr(String old_ppr, String new_Value) {
         String new_ppr = "";
         Boolean isFirst = true;
         
         for (String ppr: old_ppr.split("-")) {
-            if (Integer.valueOf(ppr) == new_Value) {
+            if (new_Value.equals(ppr)) {
                 continue;
             }
 

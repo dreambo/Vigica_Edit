@@ -100,8 +100,6 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
 
 	final DirectoryChooser fileChooser = new DirectoryChooser();
 
-    static private String[] perf = {"GENERAL", "INFO", "DOCUMENTARY", "MOVIES", "TV SHOW", "ZIC", "SPORT", "KIDS", "DIN", "MISC"};
-
     DVBWriter<T> writer;
     @Autowired
     DVBS2Writer dvbs2Writer;
@@ -229,12 +227,10 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
             cell.itemProperty().addListener((obs, oldValue, newValue) -> {
                 if (newValue != null) {
                     final ContextMenu cellMenu = new ContextMenu();
-                    for (int i = 1; i < 11; i++) {
-                        final CheckMenuItem prefMenuItem = new CheckMenuItem(perf[i - 1]);
-                        final int line = i;
+                    for (String pref: Utils.prefTab) {
+                        final CheckMenuItem prefMenuItem = new CheckMenuItem(pref);
 
-                        prefMenuItem.setId(String.valueOf(i));
-                        if (Utils.isPreferenceOn(cell.getText(), i)) {
+                        if (Utils.isPreferenceOn(cell.getText(), pref)) {
                             prefMenuItem.setSelected(true);
                         }
 
@@ -243,9 +239,9 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
                             final T service = (T) cell.getTableRow().getItem();
 
                             if (new_val) {
-                                new_ppr = Utils.add_ppr(cell.getText(), line);
+                            	new_ppr = Utils.add_ppr(cell.getText(), pref);
                             } else {
-                                new_ppr = Utils.remove_ppr(cell.getText(), line);
+                                new_ppr = Utils.remove_ppr(cell.getText(), pref);
                             }
 
                             service.setPpr(new_ppr);
@@ -383,7 +379,7 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
 				scanner.close();
 				String preferences = line.substring(1 + line.indexOf(">"), line.lastIndexOf("<"));
 				prefs.setText(preferences);
-				perf = preferences.split(FAV_SEP);
+				Utils.prefTab = preferences.split(FAV_SEP);
 			}
 		}
 
