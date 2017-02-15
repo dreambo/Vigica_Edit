@@ -1,5 +1,7 @@
 package dtv.tools.reader;
 
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
 import dtv.model.DVBS2Channel;
@@ -20,7 +22,7 @@ public class DVBS2Reader extends AbstractReader<DVBS2Channel> {
 	}
 
 	@Override
-	protected DVBS2Channel getDVBService(String stype, int i, String rcdname_s, int nid_d, String ppr_s, String binrcd_s) {
+	protected DVBS2Channel getDVBService(String stype, int i, String rcdname_s, int nid_d, String ppr_s, List<Byte> binrcd_s) {
 		return new DVBS2Channel(stype, i, rcdname_s, nid_d, ppr_s, binrcd_s);
 	}
 }

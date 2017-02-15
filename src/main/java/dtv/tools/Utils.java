@@ -6,14 +6,15 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.List;
 
 import dtv.model.DVBChannel;
 
 public class Utils {
 
-    public static String[] prefTab = {"GENERAL", "INFO", "DOCUMENTARY", "MOVIES", "TV SHOW", "ZIC", "SPORT", "KIDS", "DIN", "MISC"};
+	public static final String FAV_SEP = "#";
+    public static String[] PPREFS  = {"FAV0", "FAV1", "FAV2", "FAV3", "FAV4", "FAV5", "FAV6", "FAV7", "FAV8", "FAV9"};
+    public static String[] prefTab = PPREFS;
 
     public static String bytesToHexString(byte[] in) {
         final StringBuilder builder = new StringBuilder();
@@ -21,20 +22,6 @@ public class Utils {
             builder.append(String.format("%02x", b));
         }
         return builder.toString();
-    }
-
-    public static String base64Encoder(byte[] in) {
-        return Base64.getEncoder().encodeToString(in);
-    }
-
-    public static List<Byte> base64Decoder(String s) {
-    	List<Byte> bytesList = new ArrayList<>();
-        byte[] bytes = Base64.getDecoder().decode(s);
-        for (byte myByte: bytes) {
-        	bytesList.add(myByte);
-        }
-
-        return bytesList;
     }
 
     public static int find_end(byte[] bindata, int strt, byte[] endMagic) {
@@ -165,6 +152,39 @@ public class Utils {
         int i = 0;
         for (T service : services) {
 			service.setIdx(++i);
+			service.setModified(true);
 		}
     }
+
+    public static int getPrefIndex(String pref) {
+
+    	for (int i = 0; i < prefTab.length; i++) {
+    		if (prefTab[i].equals(pref)) {
+    			return i;
+    		}
+    	}
+
+    	return -1;
+    }
+
+    public static String getPreferences() {
+
+    	String preferences = "";
+    	for (String pref: prefTab) {
+    		preferences += pref + FAV_SEP;
+    	}
+
+    	return preferences;
+    }
+
+	public static List<Byte> asList(byte[] entry) {
+
+		List<Byte> bytes = new ArrayList<>();
+
+		for (byte myByte: entry) {
+			bytes.add(Byte.valueOf(myByte));
+		}
+
+		return bytes;
+	}
 }

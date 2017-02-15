@@ -32,11 +32,11 @@ public abstract class DVBWriter<T extends DVBChannel> extends Service<List<T>> {
 
         	// last two bytes must be the channel index, beginning from 0
             Byte[] indexBa = Utils.int2ba(service.getIdx());
-            sdata = Utils.base64Decoder(service.getLine()); // ByteUtils.hexStringToBytes(service.getLine());
+            sdata = service.getLine(); // ByteUtils.hexStringToBytes(service.getLine());
             sdata.set(sdata.size() - 1, indexBa[indexBa.length - 1]);
             sdata.set(sdata.size() - 2, indexBa[indexBa.length - 2]);
 
-            if (!service.getFlag()) {
+            if (!service.isModified()) {
                 satservices.addAll(sdata);
 
             } else {
@@ -99,15 +99,17 @@ public abstract class DVBWriter<T extends DVBChannel> extends Service<List<T>> {
         ppr.add((byte) 0x00);
         ppr.add((byte) 0x00);
 
-        if (preference.length() != 0) {
+        if (!preference.trim().isEmpty()) {
             for (String perf : preference.split("-")) {
 
-                if (Integer.valueOf(perf) <= 8) {
-                    Double pos = Math.pow(2, Integer.valueOf(perf) - 1);
+            	int index = Utils.getPrefIndex(perf);
+
+                if (index < 8) {
+                    Double pos = Math.pow(2, index);
                     byte temp = (byte) (ppr.get(1) | pos.byteValue());
                     ppr.set(1, temp);
                 } else {
-                    Double pos = Math.pow(2, Integer.valueOf(perf) - 8 - 1);
+                    Double pos = Math.pow(2, index - 8);
                     byte temp = (byte) (ppr.get(0) | pos.byteValue());
                     ppr.set(0, temp);
                 }

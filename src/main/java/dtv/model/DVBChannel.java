@@ -16,6 +16,8 @@
  */
 package dtv.model;
 
+import java.util.List;
+
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -33,8 +35,8 @@ public class DVBChannel implements Comparable<DVBChannel> {
     private final StringProperty name;
     private final IntegerProperty nid;
     private final StringProperty ppr;
-    private String line;
-    private boolean flag = false;
+    private List<Byte> line;
+    private boolean modified = false;
     
     public DVBChannel() {
         this.type = new SimpleStringProperty("");
@@ -44,7 +46,7 @@ public class DVBChannel implements Comparable<DVBChannel> {
         this.ppr = new SimpleStringProperty("");
     }
     
-    public DVBChannel(String stype, Integer recd_idx, String rcdname_s, Integer nid_d, String ppr_s, String line_s) {
+    public DVBChannel(String stype, Integer recd_idx, String rcdname_s, Integer nid_d, String ppr_s, List<Byte> line_s) {
         this.type = new SimpleStringProperty(stype);
         this.idx = new SimpleIntegerProperty(recd_idx);
         this.name = new SimpleStringProperty(rcdname_s);
@@ -109,18 +111,18 @@ public class DVBChannel implements Comparable<DVBChannel> {
         return ppr;
     }
     
-    public String getLine() {
+    public List<Byte> getLine() {
         return line;
     }
-    public void setLine(String line) {
+    public void setLine(List<Byte> line) {
         this.line = line;
     }
     
-    public boolean getFlag() {
-        return flag;
+    public boolean isModified() {
+        return modified;
     }
-    public void setFlag(boolean flag) {
-        this.flag = flag;
+    public void setModified(boolean modified) {
+        this.modified = modified;
     }
 
     @Override

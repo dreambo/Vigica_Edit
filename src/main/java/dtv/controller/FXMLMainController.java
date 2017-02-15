@@ -89,7 +89,6 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
 	private static final String DVB_T2 = "DVB-T2";
 
 	private static final String FAV_TAG = "fav_list_name";
-	private static final String FAV_SEP = "#";
 
 	private File dvbs2File;
 	private File dvbt2File;
@@ -245,7 +244,7 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
                             }
 
                             service.setPpr(new_ppr);
-                            service.setFlag(true);
+                            service.setModified(true);
                         });
 
                         cellMenu.getItems().add(prefMenuItem);
@@ -265,7 +264,7 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
 
             final T service = t.getTableView().getItems().get(t.getTablePosition().getRow());
             service.setName(t.getNewValue());
-            service.setFlag(true);
+            service.setModified(true);
         });
     }
 
@@ -320,6 +319,12 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
 			serviceDataS2.clear();
 			serviceDataT2.clear();
 
+			try {
+				prefs.setText(getPreferences());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
 			if (dvbs2File != null) {
             	reader = getReader(dvbs2File);
 	            handleTask((Service<List<T>>) reader, rootFolder.getName(), "Opening " + DVB_S2 + " file " + dvbs2File);
@@ -356,9 +361,6 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
 				msg = "Using " + prefsFile;
 				LOG.info(msg);
 				logs.appendText("\n" + msg);
-				try {
-					prefs.setText(getPreferences());
-				} catch (Exception e) {}
 
 			} else if (dtvFile.getName().equalsIgnoreCase(CCCAM_CFG)) {
 				cccamFile = dtvFile;
@@ -370,22 +372,27 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
 	}
 
 	private String getPreferences() throws Exception {
-		Scanner scanner = new Scanner(prefsFile);
-		String line;
 
-		while (scanner.hasNext()) {
-			line = scanner.nextLine();
-			if (line.contains(FAV_TAG)) {
-				scanner.close();
-				String preferences = line.substring(1 + line.indexOf(">"), line.lastIndexOf("<"));
-				prefs.setText(preferences);
-				Utils.prefTab = preferences.split(FAV_SEP);
+		if (prefsFile != null && prefsFile.canRead()) {
+			Scanner scanner = new Scanner(prefsFile);
+			String line;
+
+			while (scanner.hasNext()) {
+				line = scanner.nextLine();
+				if (line.contains(FAV_TAG)) {
+					String preferences = line.substring(1 + line.indexOf(">"), line.lastIndexOf("<"));
+					Utils.prefTab = preferences.split(Utils.FAV_SEP);
+					break;
+				}
 			}
+
+			scanner.close();
+
+		} else {
+			Utils.prefTab = Utils.PPREFS;
 		}
 
-		scanner.close();
-
-		return null;
+		return Utils.getPreferences();
 	}
 
 	private AbstractReader<T> getReader(File dvbFile) {
@@ -503,6 +510,7 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
         });
 
         task.setOnFailed(t -> {
+        	LOG.error("Exception while executing task", task.getException());
         	Message.errorMessage("Error " + action + "\n" + task.getException().getMessage());
         });
 

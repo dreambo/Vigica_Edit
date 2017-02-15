@@ -81,9 +81,8 @@ public abstract class AbstractReader<T extends DVBChannel> extends Service<List<
 
             // add the network number and preference setting to the end of the file name
             String rcdname_s = new String(entryName, "UTF-8");
-            String binrcd_s = Utils.base64Encoder(entry);
             // String asciiname = stype + "~" + recd_idx + "~" + rcdname_s + "~E0~" + "N" + nid_d + "~" + "P" + ppr_s;
-            T service = getDVBService(stype, ++recd_idx, rcdname_s, nid_d, ppr_s, binrcd_s);
+            T service = getDVBService(stype, ++recd_idx, rcdname_s, nid_d, ppr_s, Utils.asList(entry));
 
             services.add(service);
             bind_idx = nxt_idx + offset;
@@ -92,45 +91,25 @@ public abstract class AbstractReader<T extends DVBChannel> extends Service<List<
         return services;
     }
 
-	protected abstract T getDVBService(String stype, int i, String rcdname_s, int nid_d, String ppr_s, String binrcd_s);
+	protected abstract T getDVBService(String stype, int i, String rcdname_s, int nid_d, String ppr_s, List<Byte> binrcd_s);
 
 	protected abstract int getOffset(byte version);
 
 	protected abstract byte[] getEndMagic();
 
 	private String getPreference(byte[] ppr) {
-        String ppr_s ="";
-        Boolean isFirst = true;
 
-        for (int i = 0; i < 8; i++) {
-            if (((ppr[1] >> i) & 1) == 1) {
-                if (isFirst) {
-                    ppr_s += Utils.prefTab[i];
-                    isFirst = false;
+		String ppr_s = "";
 
-                } else {
-                    ppr_s += "-" + Utils.prefTab[i];
-                }
+        for (int i = 0; i < Utils.prefTab.length; i++) {
+
+        	int number = (i < 8 ? (ppr[1] >> i) : (ppr[0] >> (i-8)));
+            if ((number & 1) == 1) {
+            	ppr_s += "-" + Utils.prefTab[i];
             }
         }
 
-        for (int i = 9; i < 11; i++) {
-            if (((ppr[0] >> (i-9)) & 1) == 1) {
-
-            	if (i < 10) {
-                    if (isFirst) {
-                        ppr_s += (i);
-                        isFirst = false;
-                    } else {
-                        ppr_s += "-" + Utils.prefTab[i - 1];
-                    }
-                } else {
-                    ppr_s += Utils.prefTab[i - 1];
-                }
-            }
-        }
-
-        return ppr_s;
+        return ppr_s.replaceAll("^\\-", "");
     }
 
 	@Override
