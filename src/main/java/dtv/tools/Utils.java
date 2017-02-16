@@ -145,7 +145,9 @@ public class Utils {
         // Create a mask to isolate only the correct width of bits.
         long fullMask = (((1L << 31) - 1L) << 1) | 1L;
 
-        return Long.toHexString(register & fullMask);
+        String crcresult = Long.toHexString(register & fullMask);
+
+        return ("00000000" + crcresult).substring(crcresult.length());
     }
 
     public static <T extends DVBChannel> void initIds(List<T> services) {

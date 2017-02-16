@@ -80,7 +80,6 @@ public abstract class DVBWriter<T extends DVBChannel> extends Service<List<T>> {
 
         //CRC32
         String crcresult = Utils.crc32Mpeg(servicesData);
-        crcresult = ("00000000" + crcresult).substring(crcresult.length());
         List<Byte> crcbyte = Utils.hexStringToBytes(crcresult);
         
         List<Byte> mw_s1 = new ArrayList<>();
