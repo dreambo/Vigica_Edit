@@ -20,13 +20,12 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import javafx.collections.ObservableList;
-import javafx.concurrent.Service;
-import javafx.concurrent.Task;
-
 import org.springframework.stereotype.Component;
 
 import dtv.model.DVBChannel;
+import javafx.collections.ObservableList;
+import javafx.concurrent.Service;
+import javafx.concurrent.Task;
 
 /**
  * Util class for file decomposition
@@ -34,25 +33,25 @@ import dtv.model.DVBChannel;
  * @author nabillo
  */
 @Component
-public class DuplicateRemover<T extends DVBChannel> extends Service<List<T>> {
+public class DuplicateRemover extends Service<List<DVBChannel>> {
 
-	private ObservableList<T> services;
+	private ObservableList<DVBChannel> services;
 
-	public ObservableList<T> getServices() {
+	public ObservableList<DVBChannel> getServices() {
         return services;
     }
 
-	public void setServices(ObservableList<T> services) {
+	public void setServices(ObservableList<DVBChannel> services) {
         this.services = services;
     }
 
 	@Override
-	protected Task<List<T>> createTask() {
+	protected Task<List<DVBChannel>> createTask() {
 
-		return new Task<List<T>>() {
+		return new Task<List<DVBChannel>>() {
 			@Override
-			protected List<T> call() throws Exception {
-	            Set<T> serviceSet = new LinkedHashSet<T>(services);
+			protected List<DVBChannel> call() throws Exception {
+	            Set<DVBChannel> serviceSet = new LinkedHashSet<DVBChannel>(services);
 	            updateProgress(-1, 0);
 
 	            services.setAll(serviceSet);

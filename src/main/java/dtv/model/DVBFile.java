@@ -1,17 +1,38 @@
 package dtv.model;
 
 import java.io.File;
+import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import dtv.controller.Message;
 import dtv.tools.Utils;
+import javafx.concurrent.Service;
+import javafx.concurrent.Task;
 
-public class DVBFile<T extends DVBChannel> {
+public abstract class DVBFile extends Service<List<DVBChannel>> {
 
+	private static final Logger LOG = LoggerFactory.getLogger(DVBFile.class);
+
+	private boolean read = true;
 	private File dvbFile;
-	private int version;
-	private List<T> dvbServices;
+	private byte version;
+	private List<DVBChannel> dvbServices;
+
+	public DVBFile() {}
+
+	protected abstract int getOffset(byte version);
+	protected abstract byte[] getEndMagic();
+
+	public void setRead(boolean read) {
+		this.read = read;
+	}
 
 	public File getDvbFile() {
 		return dvbFile;
@@ -20,21 +41,14 @@ public class DVBFile<T extends DVBChannel> {
 		this.dvbFile = dvbFile;
 	}
 
-	public int getVersion() {
-		return version;
-	}
-	public void setVersion(int version) {
-		this.version = version;
-	}
-
-	public List<T> getDvbServices() {
+	public List<DVBChannel> getDvbServices() {
 		return dvbServices;
 	}
-	public void setDvbServices(List<T> dvbServices) {
+	public void setDvbServices(List<DVBChannel> dvbServices) {
 		this.dvbServices = dvbServices;
 	}
 
-	public List<T> createDvbServices(List<Byte> bytes) {
+	public List<DVBChannel> createDvbServices(List<Byte> bytes) {
 		return dvbServices;
 	}
 
@@ -66,7 +80,7 @@ public class DVBFile<T extends DVBChannel> {
     	List<Byte> satservices = new ArrayList<>();
     	List<Byte> sdata;
 
-        for (T service : dvbServices) {
+        for (DVBChannel service : dvbServices) {
 
         	// last two bytes must be the channel index, beginning from 0
             Byte[] indexBa = Utils.int2ba(service.getIdx() - 1);
@@ -137,4 +151,98 @@ public class DVBFile<T extends DVBChannel> {
 
         return ppr;
     }
+
+	public List<DVBChannel> load() throws Exception {
+
+    	byte[] bindata;
+    	List<DVBChannel> services = new ArrayList<>();
+
+        bindata = Files.readAllBytes(Paths.get(dvbFile.getAbsolutePath()));
+        int binl = bindata.length;
+        version = bindata[11];
+        List<Byte> fileVersion = Arrays.asList(Utils.int2ba(version));
+        byte[] givl_s = Arrays.copyOfRange(bindata, 0, 4);
+        int givl_d = ByteBuffer.wrap(givl_s).getInt() + 4;
+
+        if (binl != givl_d) {
+        	Message.errorMessage("length of input binary file \\n differs from length given in that file!");
+            return services;
+        }
+
+        byte[] recd_nmbr_s = Arrays.copyOfRange(bindata, 12, 16);
+        int recd_nmbr_d = ByteBuffer.wrap(recd_nmbr_s).getInt();
+        int recd_idx = 0;
+        int bind_idx = 16;
+        int offset = getOffset(fileVersion.get(3));
+
+        while (recd_idx < recd_nmbr_d) {
+            int nxt_idx = Utils.find_end(bindata, bind_idx, getEndMagic());
+            if (nxt_idx < 0) {
+            	LOG.error("Can not find magic end " + getEndMagic());
+            	return services;
+            }
+
+            byte[] entry = Arrays.copyOfRange(bindata, bind_idx, nxt_idx + offset);
+            int entryLength = nxt_idx - bind_idx;
+            // create record file name
+            byte[] entryName = Arrays.copyOfRange(entry, 5, Byte.toUnsignedInt(entry[1]) + 5);
+
+            // start the filename with R | TV | ? to indicate the radio/TV/unknown service type
+            String stype = "U"; // unknown
+            if (entry[entryLength - 17] == 0x00) { // this byte in fixed distance 17 back from next record has TV/Radio
+                stype = "TV";
+            } else if (entry[entryLength - 17] == 0x01) {
+                stype = "R";
+            }
+
+            byte[] nid_s = Arrays.copyOfRange(entry, entryLength - 26, entryLength - 24); // also fixed distance back from end
+            int nid_d = Utils.getInt(nid_s); // make the two bytes into an integer
+            byte[] ppr = Arrays.copyOfRange(entry, entryLength - 10, entryLength - 8); // preference setting
+            String ppr_s = getPreference(ppr);
+
+            // add the network number and preference setting to the end of the file name
+            String rcdname_s = new String(entryName, "UTF-8");
+            // String asciiname = stype + "~" + recd_idx + "~" + rcdname_s + "~E0~" + "N" + nid_d + "~" + "P" + ppr_s;
+            DVBChannel service = new DVBChannel(stype, ++recd_idx, rcdname_s, nid_d, ppr_s, Utils.asList(entry));
+
+            services.add(service);
+            bind_idx = nxt_idx + offset;
+        }
+
+        return services;
+    }
+
+	private String getPreference(byte[] ppr) {
+
+		String ppr_s = "";
+
+        for (int i = 0; i < Utils.prefTab.length; i++) {
+
+        	int number = (i < 8 ? (ppr[1] >> i) : (ppr[0] >> (i-8)));
+            if ((number & 1) == 1) {
+            	ppr_s += "-" + Utils.prefTab[i];
+            }
+        }
+
+        return ppr_s.replaceAll("^\\-", "");
+    }
+
+	private List<DVBChannel> write() throws Exception {
+		Utils.writeBytesToFile(getBytes(), dvbFile);
+		return null;
+	}
+
+	@Override
+	protected Task<List<DVBChannel>> createTask() {
+		
+		return new Task<List<DVBChannel>>() {
+
+			@Override
+			protected List<DVBChannel> call() throws Exception {
+
+	            updateProgress(-1, 0);
+	            return (read ? load() : write());
+			}
+		};
+	}
 }

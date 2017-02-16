@@ -25,6 +25,17 @@ import java.util.ResourceBundle;
 import java.util.Scanner;
 import java.util.function.Predicate;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import dtv.model.DVBChannel;
+import dtv.model.DVBFile;
+import dtv.model.DVBS2File;
+import dtv.model.DVBT2File;
+import dtv.tools.DuplicateRemover;
+import dtv.tools.Utils;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.StringProperty;
@@ -55,28 +66,12 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.DirectoryChooser;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import dtv.model.DVBChannel;
-import dtv.tools.DuplicateRemover;
-import dtv.tools.Utils;
-import dtv.tools.reader.AbstractReader;
-import dtv.tools.reader.DVBS2Reader;
-import dtv.tools.reader.DVBT2Reader;
-import dtv.tools.writer.DVBS2Writer;
-import dtv.tools.writer.DVBT2Writer;
-import dtv.tools.writer.DVBWriter;
-
 /**
  *
  * @author bnabi
  */
 @Component
-@SuppressWarnings("unchecked")
-public class FXMLMainController<T extends DVBChannel> implements Initializable {
+public class FXMLMainController implements Initializable {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FXMLMainController.class);
 
@@ -90,8 +85,8 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
 
 	private static final String FAV_TAG = "fav_list_name";
 
-	private File dvbs2File;
-	private File dvbt2File;
+	private File fileDvbs2;
+	private File fileDvbt2;
 	private File prefsFile;
 	private File cccamFile;
 
@@ -99,63 +94,59 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
 
 	final DirectoryChooser fileChooser = new DirectoryChooser();
 
-    DVBWriter<T> writer;
+    private DVBFile dvbFile;
     @Autowired
-    DVBS2Writer dvbs2Writer;
+    private DVBS2File dvbs2File;
     @Autowired
-    DVBT2Writer dvbt2Writer;
-    @Autowired
-    DuplicateRemover<T> duplicate;
+    private DVBT2File dvbt2File;
 
     @Autowired
-    DVBT2Reader dvbt2reader;
-    @Autowired
-    DVBS2Reader dvbs2reader;
+    DuplicateRemover duplicate;
 
-    SortedList<T> sortedDataS2;
-    SortedList<T> sortedDataT2;
+    SortedList<DVBChannel> sortedDataS2;
+    SortedList<DVBChannel> sortedDataT2;
 
     /**
     * The data as an observable list of Service.
     */
-    private ObservableList<T> serviceDataS2 = FXCollections.observableArrayList();
-    private ObservableList<T> serviceDataT2 = FXCollections.observableArrayList();
+    private ObservableList<DVBChannel> serviceDataS2 = FXCollections.observableArrayList();
+    private ObservableList<DVBChannel> serviceDataT2 = FXCollections.observableArrayList();
 
     private File currentDir = new File("src/test/resources");
 
-    private TableView<T> currentTable;
+    private TableView<DVBChannel> currentTable;
 
     @FXML
     TabPane tabPane;
     @FXML
-    private TableView<T> serviceDVBT2Table;
+    private TableView<DVBChannel> serviceDVBT2Table;
     @FXML
-    private TableColumn<T, Integer> s_idxColumnT2;
+    private TableColumn<DVBChannel, Integer> s_idxColumnT2;
     @FXML
-    private TableColumn<T, String> s_nameColumnT2;
+    private TableColumn<DVBChannel, String> s_nameColumnT2;
     @FXML
-    private TableColumn<T, String> s_typeColumnT2;
+    private TableColumn<DVBChannel, String> s_typeColumnT2;
     // @FXML
-    // private TableColumn<T, Integer> s_nidColumnT2;
+    // private TableColumn<DVBChannel, Integer> s_nidColumnT2;
     @FXML
-    private TableColumn<T, String> s_pprColumnT2;
+    private TableColumn<DVBChannel, String> s_pprColumnT2;
     // @FXML
-    // private TableColumn<T, String> s_newColumnT2;
+    // private TableColumn<DVBChannel, String> s_newColumnT2;
 
     @FXML
-    private TableView<T> serviceDVBS2Table;
+    private TableView<DVBChannel> serviceDVBS2Table;
     @FXML
-    private TableColumn<T, Integer> s_idxColumnS2;
+    private TableColumn<DVBChannel, Integer> s_idxColumnS2;
     @FXML
-    private TableColumn<T, String> s_nameColumnS2;
+    private TableColumn<DVBChannel, String> s_nameColumnS2;
     @FXML
-    private TableColumn<T, String> s_typeColumnS2;
+    private TableColumn<DVBChannel, String> s_typeColumnS2;
     // @FXML
-    // private TableColumn<T, Integer> s_nidColumnS2;
+    // private TableColumn<DVBChannel, Integer> s_nidColumnS2;
     @FXML
-    private TableColumn<T, String> s_pprColumnS2;
+    private TableColumn<DVBChannel, String> s_pprColumnS2;
     // @FXML
-    // private TableColumn<T, String> s_newColumnS2;
+    // private TableColumn<DVBChannel, String> s_newColumnS2;
 
     @FXML
     private TextField s_name;
@@ -186,7 +177,7 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
      */
     public FXMLMainController() {}
 
-    public void init(ObservableList<T> serviceData, TableView<T> table, TableColumn<T, Integer> idx, TableColumn<T, String> name, TableColumn<T, String> type, TableColumn<T, String> ppr) {
+    public void init(ObservableList<DVBChannel> serviceData, TableView<DVBChannel> table, TableColumn<DVBChannel, Integer> idx, TableColumn<DVBChannel, String> name, TableColumn<DVBChannel, String> type, TableColumn<DVBChannel, String> ppr) {
 
         table.setEditable(true);
         idx.setCellValueFactory(cellData -> cellData.getValue().idxProperty().asObject());
@@ -199,14 +190,14 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
 
         // Context menu
         table.setRowFactory(tableView -> {
-            final TableRow<T> row = new TableRow<>();
+            final TableRow<DVBChannel> row = new TableRow<>();
             final ContextMenu rowMenu = new ContextMenu();
 
             final MenuItem removeItem = new MenuItem("Delete");
             removeItem.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent event) {
-                    final T service = row.getItem();
+                    final DVBChannel service = row.getItem();
                     serviceData.removeAll(service);
                 }
             });
@@ -220,7 +211,7 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
         });
     
         ppr.setCellFactory(col -> {
-            final TableCell<T, String> cell = new TableCell<>();
+            final TableCell<DVBChannel, String> cell = new TableCell<>();
             
             cell.textProperty().bind(cell.itemProperty());
             cell.itemProperty().addListener((obs, oldValue, newValue) -> {
@@ -235,7 +226,7 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
 
                         prefMenuItem.selectedProperty().addListener((obs1, old_val, new_val) -> {
                             final String new_ppr;
-                            final T service = (T) cell.getTableRow().getItem();
+                            final DVBChannel service = (DVBChannel) cell.getTableRow().getItem();
 
                             if (new_val) {
                             	new_ppr = Utils.add_ppr(cell.getText(), pref);
@@ -262,7 +253,7 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
 
         name.setOnEditCommit(t -> {
 
-            final T service = t.getTableView().getItems().get(t.getTablePosition().getRow());
+            final DVBChannel service = t.getTableView().getItems().get(t.getTablePosition().getRow());
             service.setName(t.getNewValue());
             service.setModified(true);
         });
@@ -274,8 +265,8 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
         pi.setVisible(false);
 
         // test
-        FilteredList<T> filteredDataS2 = new FilteredList<>(serviceDataS2);
-        FilteredList<T> filteredDataT2 = new FilteredList<>(serviceDataT2);
+        FilteredList<DVBChannel> filteredDataS2 = new FilteredList<>(serviceDataS2);
+        FilteredList<DVBChannel> filteredDataT2 = new FilteredList<>(serviceDataT2);
 
         s_name.textProperty().addListener(obs -> filteredDataS2.setPredicate(getPredicate(obs)));
         s_name.textProperty().addListener(obs -> filteredDataT2.setPredicate(getPredicate(obs)));
@@ -292,7 +283,7 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
         disableComponents(true);
     }
 
-    private Predicate<T> getPredicate(Observable filter) {
+    private Predicate<DVBChannel> getPredicate(Observable filter) {
 
     	return (s -> {
         	if (filter == null || !(filter instanceof StringProperty)) {
@@ -315,7 +306,6 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
 
             currentDir = rootFolder;
             initFiles(rootFolder);
-            AbstractReader<T> reader;
 			serviceDataS2.clear();
 			serviceDataT2.clear();
 
@@ -325,15 +315,17 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
 				e.printStackTrace();
 			}
 
-			if (dvbs2File != null) {
-            	reader = getReader(dvbs2File);
-	            handleTask((Service<List<T>>) reader, rootFolder.getName(), "Opening " + DVB_S2 + " file " + dvbs2File);
+			if (fileDvbs2 != null) {
+				dvbs2File.setDvbFile(fileDvbs2);
+				dvbs2File.setRead(true);
+				handleTask(dvbs2File, rootFolder.getName(), "Opening " + DVB_S2 + " file " + fileDvbs2);
 	            tabPane.getSelectionModel().select(0);
             }
 
-            if (dvbt2File != null) {
-	            reader = getReader(dvbt2File);
-	            handleTask((Service<List<T>>) reader, rootFolder.getName(), "Opening " + DVB_T2 + " file " + dvbs2File);
+            if (fileDvbt2 != null) {
+				dvbt2File.setDvbFile(fileDvbt2);
+				dvbt2File.setRead(true);
+	            handleTask(dvbt2File, rootFolder.getName(), "Opening " + DVB_T2 + " file " + fileDvbs2);
 	            tabPane.getSelectionModel().select(1);
             }
         }
@@ -342,18 +334,18 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
     private void initFiles(File rootFolder) {
 
     	File[] files = rootFolder.listFiles();
-    	dvbs2File = dvbt2File = prefsFile = cccamFile = null;
+    	fileDvbs2 = fileDvbt2 = prefsFile = cccamFile = null;
     	String msg;
 
     	for (File dtvFile: files) {
 			if (dtvFile.getName().equalsIgnoreCase(DVB_S_MW_S1)) {
-				dvbs2File = dtvFile;
-				msg = "Using " + dvbs2File;
+				fileDvbs2 = dtvFile;
+				msg = "Using " + fileDvbs2;
 				LOG.info(msg);
 				logs.appendText("\n" + msg);
 			} else if (dtvFile.getName().equalsIgnoreCase(DVB_T_MW_S1)) {
-				dvbt2File = dtvFile;
-				msg = "Using " + dvbt2File;
+				fileDvbt2 = dtvFile;
+				msg = "Using " + fileDvbt2;
 				LOG.info(msg);
 				logs.appendText("\n" + msg);
 			} else if (dtvFile.getName().equalsIgnoreCase(DTV_PREFS)) {
@@ -395,34 +387,17 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
 		return Utils.getPreferences();
 	}
 
-	private AbstractReader<T> getReader(File dvbFile) {
+	private void save(File file, ObservableList<DVBChannel> serviceData) throws Exception {
 
-		String fileName = dvbFile.getName();
-		AbstractReader<T> reader = null;
-
-    	if (fileName.toLowerCase().startsWith(DVB_S_MW_S1)) {
-    		reader = (AbstractReader<T>) dvbs2reader;
-    		reader.setDvbFile(dvbFile);
-
-    	} else if (fileName.toLowerCase().startsWith(DVB_T_MW_S1)) {
-    		reader = (AbstractReader<T>) dvbt2reader;
-    		reader.setDvbFile(dvbFile);
-    	}
-
-    	return reader;
-	}
-
-	private void save(File dvbFile, ObservableList<T> serviceData) throws Exception {
-
-		if (serviceData.size() == 0 || dvbFile == null) {
+		if (serviceData.size() == 0 || file == null) {
 	        Message.errorMessage("No service file loaded\n");
 	        return;
 	    }
 
-        writer.setDvbFile(dvbFile);
-        writer.setServices(serviceData);
-        writer.setFileVersion(getReader(dvbFile).getFileVersion());
-        handleTask(writer, dvbFile.getParentFile().getName(), "Save services " + dvbFile.getName());
+		dvbFile.setDvbFile(file);
+		dvbFile.setRead(false);
+		dvbFile.setDvbServices(serviceData);
+        handleTask(dvbFile, file.getParentFile().getName(), "Save services " + file.getName());
 	}
 
 	@FXML
@@ -435,13 +410,13 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
 	    if (rootFolder != null) {
 	        currentDir = rootFolder;
 	        // save DVB-S2
-			if (dvbs2File != null) {
-				writer = (DVBWriter<T>) dvbs2Writer;
+			if (fileDvbs2 != null) {
+				dvbFile = dvbs2File;
 				save(new File(rootFolder, DVB_S_MW_S1), serviceDataS2);
 			}
 	        // save DVB-T2
-			if (dvbt2File != null) {
-				writer = (DVBWriter<T>) dvbt2Writer;
+			if (fileDvbt2 != null) {
+				dvbFile = dvbt2File;
 				save(new File(rootFolder, DVB_T_MW_S1), serviceDataT2);
 			}
 	    }
@@ -451,7 +426,7 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
 	private void duplicateAction(ActionEvent event) throws Exception {
 
     	String action = "Remove duplicated services";
-    	ObservableList<T> tableData = getData();
+    	ObservableList<DVBChannel> tableData = getData();
 		if (tableData != null) {
 			duplicate.setServices(tableData);
 			handleTask(duplicate, null, action);
@@ -461,18 +436,18 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
 	@FXML
     private void sortAction(ActionEvent event) {
 
-		ObservableList<T> tableData = getData();
+		ObservableList<DVBChannel> tableData = getData();
 		if (tableData != null) {
 			currentTable.getSortOrder().clear();
 			tableData.setAll(currentTable.getItems());
-			Comparator<T> comparator = (channel1, channel2) -> (order * channel1.compareTo(channel2));
+			Comparator<DVBChannel> comparator = (channel1, channel2) -> (order * channel1.compareTo(channel2));
 			Collections.sort(tableData, comparator);
 			Utils.initIds(tableData);
 			order = -order;
 		}
     }
 
-    private ObservableList<T> getData() {
+    private ObservableList<DVBChannel> getData() {
 
 		if (tabPane.getSelectionModel().isSelected(0)) {
 			currentTable = serviceDVBS2Table;
@@ -487,14 +462,14 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
 		return null;
     }
 
-    private void handleTask(Service<List<T>> task, String zeTitle, String action) throws Exception {
+    private void handleTask(Service<List<DVBChannel>> task, String zeTitle, String action) throws Exception {
 
         pi.visibleProperty().bind(task.runningProperty());
         pi.progressProperty().bind(task.progressProperty());
 
         task.setOnSucceeded(t -> {
             // print services into tableview
-    		List<T> dvbServices = task.getValue();
+    		List<DVBChannel> dvbServices = task.getValue();
     		if (dvbServices != null) {
         		if (action.contains(DVB_S2)) {
             		serviceDataS2.setAll(dvbServices);
@@ -520,7 +495,7 @@ public class FXMLMainController<T extends DVBChannel> implements Initializable {
     	}
     }
 
-    class EditingCell extends TableCell<T, String> {
+    class EditingCell extends TableCell<DVBChannel, String> {
 
         private TextField textField;
 
