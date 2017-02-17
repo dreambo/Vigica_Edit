@@ -132,9 +132,9 @@ public class DVBChannel implements Comparable<DVBChannel> {
     		return false;
     	}
 
-    	DVBChannel dvbService = (DVBChannel) obj;
+    	DVBChannel channel = (DVBChannel) obj;
 
-    	return (getName() != null && getName().equals(dvbService.getName()) && getType() != null && getType().equals(dvbService.getType()));
+    	return (getName() != null && getName().equals(channel.getName()) && getType() != null && getType().equals(channel.getType()));
     }
 
     @Override
@@ -144,13 +144,13 @@ public class DVBChannel implements Comparable<DVBChannel> {
 
     @Override
     public String toString() {
-    	return getName() + "[" + getNid() + "]";
+    	return getName() + "[" + getType() + "]";
     }
 
 	@Override
 	public int compareTo(DVBChannel channel) {
 
-		if (getName() != null && getType() != null && getType().equals(channel.getType())) {
+		if (getType().equals(channel.getType())) {
 			return getName().toLowerCase().compareTo(channel.getName().toLowerCase());
 		}
 

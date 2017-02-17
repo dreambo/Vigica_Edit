@@ -87,14 +87,13 @@ public class FXMLMainController implements Initializable {
 
 	private File fileDvbs2;
 	private File fileDvbt2;
-	private File prefsFile;
-	private File cccamFile;
+	private File filePrefs;
+	private File fileCCcam;
 
 	private int order = 1;
 
-	final DirectoryChooser fileChooser = new DirectoryChooser();
+	final DirectoryChooser folderChooser = new DirectoryChooser();
 
-    private DVBFile dvbFile;
     @Autowired
     private DVBS2File dvbs2File;
     @Autowired
@@ -298,13 +297,14 @@ public class FXMLMainController implements Initializable {
     @FXML
     private void openAction(ActionEvent event) throws Exception {
 
-        fileChooser.setInitialDirectory(currentDir.exists() ? currentDir : null);
-	    fileChooser.setTitle("Choose the DTV backup folder");
-        File rootFolder = fileChooser.showDialog(tabPane.getScene().getWindow());
+        folderChooser.setInitialDirectory(currentDir.exists() ? currentDir : null);
+	    folderChooser.setTitle("Choose the DTV backup folder");
+        File rootFolder = folderChooser.showDialog(tabPane.getScene().getWindow());
 
         if (rootFolder != null) {
 
             currentDir = rootFolder;
+			logs.clear();
             initFiles(rootFolder);
 			serviceDataS2.clear();
 			serviceDataT2.clear();
@@ -334,7 +334,7 @@ public class FXMLMainController implements Initializable {
     private void initFiles(File rootFolder) {
 
     	File[] files = rootFolder.listFiles();
-    	fileDvbs2 = fileDvbt2 = prefsFile = cccamFile = null;
+    	fileDvbs2 = fileDvbt2 = filePrefs = fileCCcam = null;
     	String msg;
 
     	for (File dtvFile: files) {
@@ -349,14 +349,14 @@ public class FXMLMainController implements Initializable {
 				LOG.info(msg);
 				logs.appendText("\n" + msg);
 			} else if (dtvFile.getName().equalsIgnoreCase(DTV_PREFS)) {
-				prefsFile = dtvFile;
-				msg = "Using " + prefsFile;
+				filePrefs = dtvFile;
+				msg = "Using " + filePrefs;
 				LOG.info(msg);
 				logs.appendText("\n" + msg);
 
 			} else if (dtvFile.getName().equalsIgnoreCase(CCCAM_CFG)) {
-				cccamFile = dtvFile;
-				msg = "Using " + cccamFile;
+				fileCCcam = dtvFile;
+				msg = "Using " + fileCCcam;
 				LOG.info(msg);
 				logs.appendText("\n" + msg);
 			}
@@ -365,8 +365,8 @@ public class FXMLMainController implements Initializable {
 
 	private String getPreferences() throws Exception {
 
-		if (prefsFile != null && prefsFile.canRead()) {
-			Scanner scanner = new Scanner(prefsFile);
+		if (filePrefs != null && filePrefs.canRead()) {
+			Scanner scanner = new Scanner(filePrefs);
 			String line;
 
 			while (scanner.hasNext()) {
@@ -387,7 +387,7 @@ public class FXMLMainController implements Initializable {
 		return Utils.getPreferences();
 	}
 
-	private void save(File file, ObservableList<DVBChannel> serviceData) throws Exception {
+	private void save(DVBFile dvbFile, File file, List<DVBChannel> serviceData) throws Exception {
 
 		if (serviceData.size() == 0 || file == null) {
 	        Message.errorMessage("No service file loaded\n");
@@ -403,22 +403,38 @@ public class FXMLMainController implements Initializable {
 	@FXML
 	private void saveAction(ActionEvent event) throws Exception {
 
-	    fileChooser.setInitialDirectory(currentDir.exists() ? currentDir : null);
-	    fileChooser.setTitle("Choose the folder to where store the files");
-	    File rootFolder = fileChooser.showDialog(tabPane.getScene().getWindow()); // SaveDialog(serviceTable.getScene().getWindow());
+	    folderChooser.setInitialDirectory(currentDir.exists() ? currentDir : null);
+	    folderChooser.setTitle("Choose the folder to where store the files");
+	    File rootFolder = folderChooser.showDialog(tabPane.getScene().getWindow());
 
 	    if (rootFolder != null) {
-	        currentDir = rootFolder;
+
+	    	 if (rootFolder.getAbsolutePath().equalsIgnoreCase(currentDir.getAbsolutePath())) {
+	    		 Message.errorMessage("Please choose other folder than the current one");
+	    		 return;
+	    	 }
+
 	        // save DVB-S2
 			if (fileDvbs2 != null) {
-				dvbFile = dvbs2File;
-				save(new File(rootFolder, DVB_S_MW_S1), serviceDataS2);
+				save(dvbs2File, new File(rootFolder, DVB_S_MW_S1), serviceDataS2);
 			}
 	        // save DVB-T2
 			if (fileDvbt2 != null) {
-				dvbFile = dvbt2File;
-				save(new File(rootFolder, DVB_T_MW_S1), serviceDataT2);
+				save(dvbt2File, new File(rootFolder, DVB_T_MW_S1), serviceDataT2);
 			}
+
+			// copy all other files into rootFolder
+			File[] files = currentDir.listFiles();
+			for (File file: files) {
+
+				String name = file.getName().toLowerCase();
+
+				if (file.isFile() && !name.startsWith(DVB_S_MW_S1) && !name.startsWith(DVB_T_MW_S1)) {
+					Utils.copy(file, rootFolder);
+				}
+			}
+
+			currentDir = rootFolder;
 	    }
 	}
 

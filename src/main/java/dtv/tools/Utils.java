@@ -4,6 +4,8 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -188,5 +190,19 @@ public class Utils {
 		}
 
 		return bytes;
+	}
+
+	/**
+	 * copy the file src to this folder
+	 * @param src: source file
+	 * @param dst: destination file
+	 */
+	public static void copy(File src, File folder) {
+		try {
+			File dst = new File(folder, src.getName());
+			Files.copy(src.toPath(), dst.toPath(), StandardCopyOption.REPLACE_EXISTING);
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

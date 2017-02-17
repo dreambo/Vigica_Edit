@@ -21,6 +21,7 @@ public abstract class DVBFile extends Service<List<DVBChannel>> {
 	private static final Logger LOG = LoggerFactory.getLogger(DVBFile.class);
 
 	private boolean read = true;
+	private int offset;
 	private File dvbFile;
 	private byte version;
 	private List<DVBChannel> dvbServices;
@@ -34,22 +35,12 @@ public abstract class DVBFile extends Service<List<DVBChannel>> {
 		this.read = read;
 	}
 
-	public File getDvbFile() {
-		return dvbFile;
-	}
 	public void setDvbFile(File dvbFile) {
 		this.dvbFile = dvbFile;
 	}
 
-	public List<DVBChannel> getDvbServices() {
-		return dvbServices;
-	}
 	public void setDvbServices(List<DVBChannel> dvbServices) {
 		this.dvbServices = dvbServices;
-	}
-
-	public List<DVBChannel> createDvbServices(List<Byte> bytes) {
-		return dvbServices;
 	}
 
 	// convert all properties to a list of bytes
@@ -59,7 +50,7 @@ public abstract class DVBFile extends Service<List<DVBChannel>> {
 		List<Byte> servicesData = getServicesData();
 		List<Byte> bytes = new ArrayList<>();
 
-		int fileLength = 12 + servicesData.size(); // 4 crc + 4 type + 4 service count + all service records
+		int fileLength = 12 + servicesData.size(); // 4 crc + 4 version + 4 service count + all service records
 		String crc = Utils.crc32Mpeg(servicesData);
 
 		// header
@@ -82,18 +73,20 @@ public abstract class DVBFile extends Service<List<DVBChannel>> {
 
         for (DVBChannel service : dvbServices) {
 
-        	// last two bytes must be the channel index, beginning from 0
-            Byte[] indexBa = Utils.int2ba(service.getIdx() - 1);
             sdata = service.getLine();
-            sdata.set(sdata.size() - 1, indexBa[indexBa.length - 1]);
-            sdata.set(sdata.size() - 2, indexBa[indexBa.length - 2]);
+            if (version > 0x0D) {
+            	// last two bytes must be the channel index, beginning from 0
+                Byte[] indexBa = Utils.int2ba(service.getIdx() - 1);
+            	sdata.set(sdata.size() - 1, indexBa[indexBa.length - 1]);
+            	sdata.set(sdata.size() - 2, indexBa[indexBa.length - 2]);
+            }
 
             if (!service.isModified()) {
                 satservices.addAll(sdata);
 
             } else {
 
-                int entryLength = sdata.size();
+                int entryLength = sdata.size() - offset;
                 List<Byte> prefs = getPpr(service.getPpr());
                 sdata.set(entryLength - 10, prefs.get(0));
                 sdata.set(entryLength -  9, prefs.get(1));
@@ -159,8 +152,6 @@ public abstract class DVBFile extends Service<List<DVBChannel>> {
 
         bindata = Files.readAllBytes(Paths.get(dvbFile.getAbsolutePath()));
         int binl = bindata.length;
-        version = bindata[11];
-        List<Byte> fileVersion = Arrays.asList(Utils.int2ba(version));
         byte[] givl_s = Arrays.copyOfRange(bindata, 0, 4);
         int givl_d = ByteBuffer.wrap(givl_s).getInt() + 4;
 
@@ -173,7 +164,7 @@ public abstract class DVBFile extends Service<List<DVBChannel>> {
         int recd_nmbr_d = ByteBuffer.wrap(recd_nmbr_s).getInt();
         int recd_idx = 0;
         int bind_idx = 16;
-        int offset = getOffset(fileVersion.get(3));
+        offset = getOffset(version = bindata[11]);
 
         while (recd_idx < recd_nmbr_d) {
             int nxt_idx = Utils.find_end(bindata, bind_idx, getEndMagic());
@@ -183,7 +174,8 @@ public abstract class DVBFile extends Service<List<DVBChannel>> {
             }
 
             byte[] entry = Arrays.copyOfRange(bindata, bind_idx, nxt_idx + offset);
-            int entryLength = nxt_idx - bind_idx;
+            // int entryLength = nxt_idx - bind_idx;
+            int entryLength = entry.length - offset;
             // create record file name
             byte[] entryName = Arrays.copyOfRange(entry, 5, Byte.toUnsignedInt(entry[1]) + 5);
 
