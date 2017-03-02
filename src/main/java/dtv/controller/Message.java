@@ -49,7 +49,7 @@ public class Message {
     	dialog.show();
     	*/
         Alert alert = new Alert(info ? AlertType.INFORMATION : AlertType.ERROR);
-        alert.setTitle("Info");
+        alert.setTitle(info ? "Info" : "Error");
         alert.setHeaderText(null);
         alert.setContentText(msg);
 

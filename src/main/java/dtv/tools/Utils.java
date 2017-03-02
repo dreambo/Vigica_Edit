@@ -195,7 +195,7 @@ public class Utils {
 	/**
 	 * copy the file src to this folder
 	 * @param src: source file
-	 * @param dst: destination file
+	 * @param folder: destination folder
 	 */
 	public static void copy(File src, File folder) {
 		try {

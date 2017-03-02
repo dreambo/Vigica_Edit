@@ -89,7 +89,7 @@ public class DTVEdit extends Application {
         primaryStage.show();
     }
 
-    public static Object load(String url) {
+    private Object load(String url) {
         FXMLLoader loader = new FXMLLoader();
         loader.setControllerFactory(clazz -> applicationContext.getBean(clazz));
         loader.setLocation(DTVEdit.class.getResource(url));
