@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<map>
+    <boolean name="MENULOCK_ONOFF" value="false" />
+    <int name="TIMESHIFTLENGTH" value="1" />
+    <int name="TIMEZONE_VALUE" value="120" />
+    <int name="CUSTOMRECORDLENGTH" value="100" />
+    <int name="SEARCH_SERVICE_TYPE" value="0" />
+    <int name="LONGITUDE_VALUE" value="0" />
+    <boolean name="SUBTITLE_ONOFF_0" value="false" />
+    <int name="RECORDLENGTH" value="5" />
+    <boolean name="LCN" value="true" />
+    <string name="TELETEXT_LANGUAGE">eng</string>
+    <string name="SUBTITLE_LANGUAGE">eng</string>
+    <int name="CUSTOMTIMESHIFTLENGTH" value="60" />
+    <int name="BANNER_TIMEOUT" value="1" />
+    <int name="VIDEO_SCREEN_FORMAT" value="1" />
+    <int name="ANT_POWER_0_1" value="0" />
+    <int name="SEARCH_TV_TYPE" value="0" />
+    <boolean name="NIT_SEARCH" value="true" />
+    <string name="fav_list_name">ARABE#TNT#FAV3#FAV4#FAV5#FAV6#FAV7#FAV8#FAV9#FAV10#</string>
+    <int name="LATITUDE_VALUE" value="0" />
+    <boolean name="CHANNELLOCK_ONOFF" value="true" />
+    <int name="DATA_VERSION_NUMBER" value="7" />
+    <int name="PARENTAL_RATING_VALUE" value="18" />
+    <string name="SECOND_AUDIO_LANGUAGE">eng</string>
+    <int name="LOCATION_VALUE" value="0" />
+    <string name="FIRST_AUDIO_LANGUAGE">fra</string>
+    <int name="HEMISPHERE_VALUE" value="0" />
+    <int name="ANT_POWER_0_0" value="0" />
+</map>

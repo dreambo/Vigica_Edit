@@ -430,6 +430,7 @@ public class FXMLMainController implements Initializable {
 				String name = file.getName().toLowerCase();
 
 				if (file.isFile() && !name.startsWith(DVB_S_MW_S1) && !name.startsWith(DVB_T_MW_S1)) {
+					logs.appendText("\ncoping " + file);
 					Utils.copy(file, rootFolder);
 				}
 			}
