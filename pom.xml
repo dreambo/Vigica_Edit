@@ -44,3 +44,106 @@
 	</build>
 
 </project>
+<!--
+ROM:FFFFFFC000923E08                   ; ---------------------------------------------------------------------------
+ROM:FFFFFFC000923E08 FD 7B B9 A9                       STP             X29, X30, [SP,#-0x70]!
+ROM:FFFFFFC000923E0C 61 7E 00 90                       ADRP            X1, #0xFFFFFFC0018EFC98@PAGE
+ROM:FFFFFFC000923E10 FD 03 00 91                       MOV             X29, SP
+ROM:FFFFFFC000923E14 F3 53 01 A9                       STP             X19, X20, [SP,#0x10]
+ROM:FFFFFFC000923E18 73 7E 00 90                       ADRP            X19, #0xFFFFFFC0018EFB70@PAGE
+ROM:FFFFFFC000923E1C F9 23 00 F9                       STR             X25, [SP,#0x40]
+ROM:FFFFFFC000923E20 F5 5B 02 A9                       STP             X21, X22, [SP,#0x20]
+ROM:FFFFFFC000923E24 75 C2 2D 91                       ADD             X21, X19, #0xFFFFFFC0018EFB70@PAGEOFF
+ROM:FFFFFFC000923E28 20 4C 06 F9                       STR             X0, [X1,#0xFFFFFFC0018EFC98@PAGEOFF]
+ROM:FFFFFFC000923E2C F7 63 03 A9                       STP             X23, X24, [SP,#0x30]
+ROM:FFFFFFC000923E30 BF 32 00 79                       STRH            WZR, [X21,#0x18]
+ROM:FFFFFFC000923E34 BF 36 00 79                       STRH            WZR, [X21,#0x1A]
+ROM:FFFFFFC000923E38 F0 0B 00 94                       BL              sub_FFFFFFC000926DF8
+ROM:FFFFFFC000923E3C F6 03 00 2A                       MOV             W22, W0
+ROM:FFFFFFC000923E40 00 0A 00 35                       CBNZ            W0, loc_FFFFFFC000923F80
+ROM:FFFFFFC000923E44 00 00 00 B0                       ADRP            X0, #loc_FFFFFFC0009240D8@PAGE
+ROM:FFFFFFC000923E48 23 3B 00 F0                       ADRP            X3, #0xFFFFFFC00108AE80@PAGE
+ROM:FFFFFFC000923E4C 00 60 03 91                       ADD             X0, X0, #loc_FFFFFFC0009240D8@PAGEOFF
+ROM:FFFFFFC000923E50 01 00 80 D2                       MOV             X1, #0
+ROM:FFFFFFC000923E54 02 00 80 12                       MOV             W2, #0xFFFFFFFF
+ROM:FFFFFFC000923E58 63 00 3A 91                       ADD             X3, X3, #0xFFFFFFC00108AE80@PAGEOFF
+ROM:FFFFFFC000923E5C 3C 6B DE 97                       BL              sub_FFFFFFC0000BEB4C
+ROM:FFFFFFC000923E60 1F 04 40 B1                       CMN             X0, #1,LSL#12
+ROM:FFFFFFC000923E64 F7 03 00 AA                       MOV             X23, X0
+ROM:FFFFFFC000923E68 88 09 00 54                       B.HI            loc_FFFFFFC000923F98
+ROM:FFFFFFC000923E6C 49 AC DE 97                       BL              sub_FFFFFFC0000CEF90
+ROM:FFFFFFC000923E70 74 21 00 D0                       ADRP            X20, #loc_FFFFFFC000D51148@PAGE
+ROM:FFFFFFC000923E74 B7 16 00 F9                       STR             X23, [X21,#0x28]
+ROM:FFFFFFC000923E78
+ROM:FFFFFFC000923E78                   loc_FFFFFFC000923E78                    ; CODE XREF: ROM:FFFFFFC000923FBC↓j
+ROM:FFFFFFC000923E78 75 7E 00 90                       ADRP            X21, #0xFFFFFFC0018EF118@PAGE
+ROM:FFFFFFC000923E7C 21 00 80 52                       MOV             W1, #1
+ROM:FFFFFFC000923E80 A2 07 80 52                       MOV             W2, #0x3D
+ROM:FFFFFFC000923E84 A0 8E 40 F9                       LDR             X0, [X21,#0xFFFFFFC0018EF118@PAGEOFF]
+ROM:FFFFFFC000923E88 00 0C 40 F9                       LDR             X0, [X0,#0x18]
+ROM:FFFFFFC000923E8C 9E D8 FF 97                       BL              sub_FFFFFFC00091A104
+ROM:FFFFFFC000923E90 A0 8E 40 F9                       LDR             X0, [X21,#0xFFFFFFC0018EF118@PAGEOFF]
+ROM:FFFFFFC000923E94 21 00 80 52                       MOV             W1, #1
+ROM:FFFFFFC000923E98 82 07 80 52                       MOV             W2, #0x3C
+ROM:FFFFFFC000923E9C 95 22 05 91                       ADD             X21, X20, #loc_FFFFFFC000D51148@PAGEOFF
+ROM:FFFFFFC000923EA0 B5 C2 01 91                       ADD             X21, X21, #0x70
+ROM:FFFFFFC000923EA4 00 0C 40 F9                       LDR             X0, [X0,#0x18]
+ROM:FFFFFFC000923EA8 97 D8 FF 97                       BL              sub_FFFFFFC00091A104
+ROM:FFFFFFC000923EAC 20 00 80 52                       MOV             W0, #1
+ROM:FFFFFFC000923EB0 9A F3 FF 97                       BL              sub_FFFFFFC000920D18
+ROM:FFFFFFC000923EB4 40 06 80 52                       MOV             W0, #0x32
+ROM:FFFFFFC000923EB8 49 B0 DF 97                       BL              sub_FFFFFFC00010FFDC
+ROM:FFFFFFC000923EBC BF 6B 00 B9                       STR             WZR, [X29,#0x68]
+ROM:FFFFFFC000923EC0 40 3B 00 B0                       ADRP            X0, #0xFFFFFFC00108C190@PAGE
+ROM:FFFFFFC000923EC4 E1 03 15 AA                       MOV             X1, X21
+ROM:FFFFFFC000923EC8 62 3A 80 52                       MOV             W2, #0x1D3
+ROM:FFFFFFC000923ECC 00 40 06 91                       ADD             X0, X0, #0xFFFFFFC00108C190@PAGEOFF
+ROM:FFFFFFC000923ED0 BF 6F 00 B9                       STR             WZR, [X29,#0x6C]
+ROM:FFFFFFC000923ED4 8C 32 E1 97                       BL              sub_FFFFFFC000170904
+ROM:FFFFFFC000923ED8 61 21 00 B0                       ADRP            X1, #unk_FFFFFFC000D500B0@PAGE
+ROM:FFFFFFC000923EDC 00 00 80 D2                       MOV             X0, #0
+ROM:FFFFFFC000923EE0 21 C0 02 91                       ADD             X1, X1, #unk_FFFFFFC000D500B0@PAGEOFF
+ROM:FFFFFFC000923EE4 02 00 80 D2                       MOV             X2, #0
+ROM:FFFFFFC000923EE8 4D 8D 02 94                       BL              sub_FFFFFFC0009C741C
+ROM:FFFFFFC000923EEC F7 03 00 AA                       MOV             X23, X0
+ROM:FFFFFFC000923EF0 80 06 00 B5                       CBNZ            X0, loc_FFFFFFC000923FC0
+ROM:FFFFFFC000923EF4 40 3B 00 B0                       ADRP            X0, #0xFFFFFFC00108C288@PAGE
+ROM:FFFFFFC000923EF8 E1 03 15 AA                       MOV             X1, X21
+ROM:FFFFFFC000923EFC 00 20 0A 91                       ADD             X0, X0, #0xFFFFFFC00108C288@PAGEOFF
+ROM:FFFFFFC000923F00 C2 3D 80 52                       MOV             W2, #0x1EE
+ROM:FFFFFFC000923F04 80 32 E1 97                       BL              sub_FFFFFFC000170904
+ROM:FFFFFFC000923F08
+ROM:FFFFFFC000923F08                   loc_FFFFFFC000923F08                    ; CODE XREF: ROM:FFFFFFC000924078↓j
+ROM:FFFFFFC000923F08 73 C2 2D 91                       ADD             X19, X19, #0xFFFFFFC0018EFB70@PAGEOFF
+ROM:FFFFFFC000923F0C A4 6B 40 B9                       LDR             W4, [X29,#0x68]
+ROM:FFFFFFC000923F10 A5 6F 40 B9                       LDR             W5, [X29,#0x6C]
+ROM:FFFFFFC000923F14 81 22 05 91                       ADD             X1, X20, #loc_FFFFFFC000D51148@PAGEOFF
+ROM:FFFFFFC000923F18 40 3B 00 B0                       ADRP            X0, #0xFFFFFFC00108C2D8@PAGE
+ROM:FFFFFFC000923F1C 22 3E 80 52                       MOV             W2, #0x1F1
+ROM:FFFFFFC000923F20 63 22 40 B9                       LDR             W3, [X19,#0x20]
+ROM:FFFFFFC000923F24 21 C0 01 91                       ADD             X1, X1, #0x70
+ROM:FFFFFFC000923F28 00 60 0B 91                       ADD             X0, X0, #0xFFFFFFC00108C2D8@PAGEOFF
+ROM:FFFFFFC000923F2C 76 32 E1 97                       BL              sub_FFFFFFC000170904
+ROM:FFFFFFC000923F30 93 FF FF 97                       BL              sub_FFFFFFC000923D7C
+ROM:FFFFFFC000923F34 62 7E 00 90                       ADRP            X2, #0xFFFFFFC0018EFCC0@PAGE
+ROM:FFFFFFC000923F38 80 4B 00 B0                       ADRP            X0, #0xFFFFFFC001294CE8@PAGE
+ROM:FFFFFFC000923F3C 42 00 33 91                       ADD             X2, X2, #0xFFFFFFC0018EFCC0@PAGEOFF
+ROM:FFFFFFC000923F40 00 A0 33 91                       ADD             X0, X0, #0xFFFFFFC001294CE8@PAGEOFF
+ROM:FFFFFFC000923F44 41 3B 00 B0                       ADRP            X1, #0xFFFFFFC00108C308@PAGE
+ROM:FFFFFFC000923F48 00 E0 00 91                       ADD             X0, X0, #0x38
+ROM:FFFFFFC000923F4C 21 20 0C 91                       ADD             X1, X1, #0xFFFFFFC00108C308@PAGEOFF
+ROM:FFFFFFC000923F50 42 50 40 B8                       LDUR            W2, [X2,#5]
+ROM:FFFFFFC000923F54 FC 85 E8 97                       BL              sub_FFFFFFC000345744
+ROM:FFFFFFC000923F58 60 7E 00 90                       ADRP            X0, #0xFFFFFFC0018EFB08@PAGE
+ROM:FFFFFFC000923F5C 21 00 80 52                       MOV             W1, #1
+ROM:FFFFFFC000923F60 01 08 0B B9                       STR             W1, [X0,#0xFFFFFFC0018EFB08@PAGEOFF]
+ROM:FFFFFFC000923F64
+ROM:FFFFFFC000923F64                   loc_FFFFFFC000923F64                    ; CODE XREF: ROM:FFFFFFC000923F94↓j
+ROM:FFFFFFC000923F64 E0 03 16 2A                       MOV             W0, W22
+ROM:FFFFFFC000923F68 F9 23 40 F9                       LDR             X25, [SP,#0x40]
+ROM:FFFFFFC000923F6C F3 53 41 A9                       LDP             X19, X20, [SP,#0x10]
+ROM:FFFFFFC000923F70 F5 5B 42 A9                       LDP             X21, X22, [SP,#0x20]
+ROM:FFFFFFC000923F74 F7 63 43 A9                       LDP             X23, X24, [SP,#0x30]
+ROM:FFFFFFC000923F78 FD 7B C7 A8                       LDP             X29, X30, [SP],#0x70
+ROM:FFFFFFC000923F7C C0 03 5F D6                       RET
+-->
